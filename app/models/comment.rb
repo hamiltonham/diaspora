@@ -11,7 +11,7 @@ class HandleValidator < ActiveModel::Validator
 end
 
 class Comment
-  require File.join(Rails.root, 'lib/diaspora/websocket')
+  require File.join(Rails.root, 'lib/diaspora/web_socket')
   require File.join(Rails.root, 'lib/youtube_titles')
   include YoutubeTitles
   include MongoMapper::Document
@@ -35,11 +35,6 @@ class Comment
 
   validates_presence_of :text, :diaspora_handle, :post
   validates_with HandleValidator
-
-  after_create do
-    #save the parent post to update updated_at timestamp
-    post.save
-  end
 
   before_save do
     get_youtube_title text

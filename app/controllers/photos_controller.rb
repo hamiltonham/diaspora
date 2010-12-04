@@ -21,7 +21,7 @@ class PhotosController < ApplicationController
         @aspects_with_person = @contact.aspects
       end
 
-      @posts = current_user.raw_visible_posts.all(:_type => 'Photo', :person_id => @person.id, :order => 'updated_at DESC').paginate :page => params[:page], :order => 'created_at DESC'
+      @posts = current_user.raw_visible_posts.all(:_type => 'Photo', :person_id => @person.id, :order => 'created_at DESC').paginate :page => params[:page], :order => 'created_at DESC'
 
       render 'people/show'
 
@@ -55,15 +55,15 @@ class PhotosController < ApplicationController
       end
 
     rescue TypeError
-      message = I18n.t('photos.create.type_error', :gender => current_user)
+      message = I18n.t 'photos.create.type_error'
       respond_with :location => photos_path, :error => message
 
     rescue CarrierWave::IntegrityError
-      message = I18n.t('photos.create.integrity_error', :gender => current_user)
+      message = I18n.t 'photos.create.integrity_error'
       respond_with :location => photos_path, :error => message
 
     rescue RuntimeError => e
-      message = I18n.t('photos.create.runtime_error', :gender => current_user)
+      message = I18n.t 'photos.create.runtime_error'
       respond_with :location => photos_path, :error => message
       raise e
     end

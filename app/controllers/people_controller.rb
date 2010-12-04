@@ -11,8 +11,8 @@ class PeopleController < ApplicationController
   def index
     @aspect = :search
 
-    @people = Person.search(params[:q]).paginate :page => params[:page], :per_page => 25, :order => 'updated_at DESC'
-    @requests = Request.all(:to_id.in => @people.map{|p| p.id})
+    @people = Person.search(params[:q]).paginate :page => params[:page], :per_page => 25, :order => 'created_at DESC'
+    @requests = Request.all(:to_id.in => @people.map{|p| p.id}, :from_id => current_user.person.id)
     
     #only do it if it is an email address
     if params[:q].try(:match, Devise.email_regexp)
@@ -39,7 +39,7 @@ class PeopleController < ApplicationController
         @aspects_with_person = @contact.aspects
       end
 
-      @posts = current_user.visible_posts(:person_id => @person.id, :_type => "StatusMessage").paginate :page => params[:page], :order => 'updated_at DESC'
+      @posts = current_user.visible_posts(:person_id => @person.id, :_type => "StatusMessage").paginate :page => params[:page], :order => 'created_at DESC'
       @post_hashes = hashes_for_posts @posts
       respond_with @person, :locals => {:post_type => :all}
 
@@ -116,14 +116,6 @@ class PeopleController < ApplicationController
     end
   end
   def webfinger(account, opts = {})
-    finger = EMWebfinger.new(account)
-    finger.on_person do |response|
-      if response.class == Person
-        response.socket_to_uid(current_user.id, opts)
-      else
-        require File.join(Rails.root,'lib/diaspora/websocket')
-        Diaspora::WebSocket.queue_to_user(current_user.id, {:class => 'people', :status => 'fail', :query => account, :response => response}.to_json)
-      end
-    end
+    Resque.enqueue(Jobs::SocketWebfinger, current_user.id, account, opts)
   end
 end

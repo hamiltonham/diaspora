@@ -72,7 +72,7 @@
       %link{:rel => "alternate", :href => "#{current_user.public_url}", :type => "application/atom+xml", :title => "Public Diaspora Feed for #{current_user.name}"}
 
   %body
-    -unless @landing_page
+    - unless @landing_page
       #notification
 
       - flash.each do |name, msg|
@@ -89,7 +89,7 @@
 
     %footer
       .container
-        = image_tag 'powered_by_diaspora.png'
+        = image_tag 'powered_by_diaspora.png', :height => "11px", :width => "145px"
         %ul#footer_nav
           %li= link_to '@joindiaspora', "http://twitter.com/joindiaspora"
           %li= link_to 'github', "https://github.com/diaspora/diaspora"

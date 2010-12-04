@@ -13,6 +13,7 @@ class Invitation
   validates_presence_of :from, :to, :into
 
   def self.invite(opts = {})
+    return false if opts[:email] == opts[:from].email
     existing_user = User.find_by_email(opts[:email])
     if existing_user
       if opts[:from].contact_for(opts[:from].person)
@@ -50,6 +51,7 @@ class Invitation
         invitee.reload
       end
 
+      invitee.serialized_private_key ||= User.generate_key
       invitee.send(:generate_invitation_token)
       invitee.invite! 
       Rails.logger.info("event=invitation_sent to=#{opts[:email]} #{"inviter=#{opts[:from].diaspora_handle}" if opts[:from]}")

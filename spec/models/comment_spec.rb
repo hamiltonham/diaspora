@@ -70,20 +70,11 @@ describe Comment do
       user2.comment "sup dog", :on => @status
       @status.reload.comments.first.text.should == "sup dog"
     end
-
-    it "updates updated_at of parent post on creation" do
-      hash = @status.to_mongo
-      hash[:updated_at] = (Time.now - 20).to_s
-      @status.collection.save(hash)
-      user2.comment "sup dog", :on => @status
-      @status.reload.updated_at.should == @status.comments.first.created_at
-    end
-
   end
 
   it 'should not send out comments when we have no people' do
     status = Factory.create(:status_message, :person => user.person)
-    User::QUEUE.should_not_receive(:add_post_request)
+    MessageHandler.should_not_receive(:add_post_request)
     user.comment "sup dog", :on => status
   end
 
@@ -104,12 +95,12 @@ describe Comment do
 
 
     it "should send a user's comment on a person's post to that person" do
-      User::QUEUE.should_receive(:add_post_request).once
+      MessageHandler.should_receive(:add_post_request).once
       user.comment "yo", :on => @person_status
     end
 
     it 'should send a user comment on his own post to lots of people' do
-      User::QUEUE.should_receive(:add_post_request).once
+      MessageHandler.should_receive(:add_post_request).once
 
       user2.raw_visible_posts.count.should == 0
 
@@ -121,13 +112,13 @@ describe Comment do
 
     it 'should send a comment a person made on your post to all people' do
       comment = Comment.new(:person_id => @person.id, :diaspora_handle => @person.diaspora_handle, :text => "cats", :post => @user_status)
-      User::QUEUE.should_receive(:add_post_request).once
+      MessageHandler.should_receive(:add_post_request).once
       user.receive comment.to_diaspora_xml, @person
     end
 
     it 'should send a comment a user made on your post to all people' do
       comment = user2.comment( "balls", :on => @user_status)
-      User::QUEUE.should_receive(:add_post_request).once
+      MessageHandler.should_receive(:add_post_request).once
       user.receive comment.to_diaspora_xml, user2.person
     end
 
@@ -137,13 +128,13 @@ describe Comment do
       end
       
       it 'should not send a comment a person made on his own post to anyone' do
-        User::QUEUE.should_not_receive(:add_post_request)
+        MessageHandler.should_not_receive(:add_post_request)
         comment = Comment.new(:person_id => @person.id, :diaspora_handle => @person.diaspora_handle, :text => "cats", :post => @person_status)
         user.receive comment.to_diaspora_xml, @person
       end
 
       it 'should not send a comment a person made on a person post to anyone' do
-        User::QUEUE.should_not_receive(:add_post_request)
+        MessageHandler.should_not_receive(:add_post_request)
         comment = Comment.new(:person_id => @person2.id, :diaspora_handle => @person.diaspora_handle, :text => "cats", :post => @person_status)
         user.receive comment.to_diaspora_xml, @person
       end

@@ -15,21 +15,9 @@ describe User do
   let(:user3) { make_user }
   let(:aspect3) { user3.aspects.create(:name => 'heroes') }
 
-
   before do
     connect_users(user, aspect, user2, aspect2)
   end
-
-
-
-
-
-
-
-
-
-
-
 
   it 'should stream only one message to the everyone aspect when a multi-aspected contacts posts' do
     user.add_person_to_aspect(user2.person.id, user.aspects.create(:name => "villains").id)
@@ -61,7 +49,8 @@ describe User do
 
   describe '#receive_salmon' do
    it 'should handle the case where the webfinger fails' do
-    Person.should_receive(:by_account_identifier).and_return("not a person")
+     pending "Write this to test #receive_salmon"
+    Webfinger.stub!(:fetch).and_return(nil)
 
     proc{
       user2.post :status_message, :message => "store this!", :to => aspect2.id
@@ -97,23 +86,27 @@ describe User do
       aspect.reload
     end
 
-    it "should add a received post to the aspect and visible_posts array" do
+    it "adds a received post to the aspect and visible_posts array" do
       user.raw_visible_posts.include?(@status_message).should be_true
       aspect.posts.include?(@status_message).should be_true
     end
 
-    it 'should be removed on disconnecting' do
+    it 'removes posts upon disconnecting' do
       user.disconnect(user2.person)
       user.reload
       user.raw_visible_posts.should_not include @status_message
     end
 
-    it 'should be remove a post if the noone links to it' do
+    it 'deletes a post if the noone links to it' do
       person = user2.person
-      user2.delete
-      person.reload
+      person.owner_id = nil
+      person.save
+      @status_message.user_refs = 1
+      @status_message.save
 
-      lambda {user.disconnect(person)}.should change(Post, :count).by(-1)
+      lambda {
+        user.disconnected_by(user2.person)
+      }.should change(Post, :count).by(-1)
     end
 
     it 'should keep track of user references for one person ' do

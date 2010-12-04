@@ -11,8 +11,6 @@
         .right{:style => "top:0;"}
           %span.description
             = @person.diaspora_handle
-            /= info_text(t('aspects.index.handle_explanation'))
-
 
       #person_nav_links
         = link_to t('layouts.header.view_profile'), person_path(@person)
@@ -23,11 +21,14 @@
 
 .span-15.last
   - if @contact || current_user.person == @person
-
     - if @posts.count > 0
       -if @post_type == :photos
+        %h4
+          Photos
         = render 'photos/index', :photos => @posts
       - else
+        %h4
+          Recent Posts
         = render 'shared/stream', :posts => @post_hashes
       = will_paginate @posts
 
@@ -47,7 +48,7 @@
   - else
     .floating
       %h3
-        = t('.not_connected', :name => @person.name, :gender => current_user)
+        = t('.not_connected', :name => @person.name)
         
       - unless pending_request_for(@person)
         %h3
@@ -59,5 +60,5 @@
       - else
         %h3
           .description
-            = t('.already_requested', :name => @person.name, :gender => current_user)
+            = t('.already_requested', :name => @person.name)
 

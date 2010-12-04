@@ -71,6 +71,7 @@ describe User do
   end
 
   describe '#dispatch_post' do
+    include Rails.application.routes.url_helpers
     let(:status) {user.build_post(:status_message, @status_opts)}
     before do
       @message = "hello, world!"
@@ -84,6 +85,18 @@ describe User do
       user.dispatch_post(status, :to => "all")
     end
 
+    it "posts to a pubsub hub if enabled" do
+      EventMachine::PubSubHubbub.should_receive(:new).and_return(FakeHttpRequest.new(:success))
+
+      destination = "http://identi.ca/hub/"
+      feed_location = "http://google.com/"
+
+      EventMachine.run {
+        user.post_to_hub(feed_location)
+        EventMachine.stop
+      }
+    end
+
     it "does not post to services if post is not public" do
       @status_opts[:public] = false
       status.save
@@ -91,6 +104,23 @@ describe User do
       user.should_not_receive(:post_to_facebook)
       user.dispatch_post(status, :to => "all")
     end
+
+     it 'includes a permalink to my post' do
+      @status_opts[:public] = true
+      status.save
+      user.should_receive(:post_to_twitter).with(service1, @message+ " #{post_path(status)}").once
+      user.should_receive(:post_to_facebook).with(service2, @message + " #{post_path(status)}").once
+      user.dispatch_post(status, :to => "all", :url => post_path(status))
+    end
+
+     it 'only pushes to services if it is a status message' do
+        photo = Photo.new()
+        photo.public = true
+        user.stub!(:push_to_aspects)
+        user.should_not_receive(:post_to_twitter)
+        user.should_not_receive(:post_to_facebook)
+        user.dispatch_post(photo, :to =>"all")
+     end
   end
 
   describe '#post' do
@@ -148,7 +178,7 @@ describe User do
       end
 
       it 'does not use the queue for local transfer' do
-        User::QUEUE.should_receive(:add_post_request).once
+        MessageHandler.should_receive(:add_post_request).once
 
         remote_person = user4.person
         remote_person.owner_id = nil

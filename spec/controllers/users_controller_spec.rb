@@ -5,13 +5,13 @@
 require 'spec_helper'
 
 describe UsersController do
+  render_views
 
   let(:user) { make_user }
   let!(:aspect) { user.aspects.create(:name => "lame-os") }
 
   let!(:old_password) { user.encrypted_password }
   let!(:old_language) { user.language }
-  let!(:old_gender) { user.grammatical_gender }
 
   before do
     sign_in :user, user
@@ -60,28 +60,12 @@ describe UsersController do
         user.language.should_not == old_language
       end
     end
+  end
 
-    describe 'grammatical_gender' do
-      it 'should allow user to change his grammatical gender for some languages' do
-        user.language = 'pl'
-        user.grammatical_gender = 'masculine'
-        user.save
-        old_gender = user.grammatical_gender
-        put("update", :id => user.id, "user" => {"language" => "ru", "grammatical_gender" => "neuter"})
-        user.reload
-        user.grammatical_gender.should_not == old_gender
-        old_gender = user.grammatical_gender
-        put("update", :id => user.id, "user" => {"language" => "ru", "grammatical_gender" => ""})
-        user.reload
-        user.grammatical_gender.should == old_gender
-        put("update", :id => user.id, "user" => {"language" => "ru", "grammatical_gender" => "feminine"})
-        user.reload
-        old_gender = user.grammatical_gender
-        put("update", :id => user.id, "user" => {"language" => "en"})
-        user.reload
-        user.grammatical_gender.should == old_gender
-      end
+  describe '#edit' do
+    it "returns a 200" do
+      get 'edit', :id => user.id
+      response.code.should == "200"
     end
-
   end
 end

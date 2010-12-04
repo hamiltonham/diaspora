@@ -4,15 +4,14 @@
 
 require File.join(Rails.root, 'lib/diaspora/user')
 require File.join(Rails.root, 'lib/salmon/salmon')
-
+require 'rest-client'
 class User
   include MongoMapper::Document
   include Diaspora::UserModules
   include Encryptor::Private
+  include ActionView::Helpers::TextHelper
 
   plugin MongoMapper::Devise
-
-  QUEUE = MessageHandler.new
 
   devise :invitable, :database_authenticatable, :registerable,
          :recoverable, :rememberable, :trackable, :validatable
@@ -168,23 +167,54 @@ class User
     Rails.logger.info("event=dispatch user=#{diaspora_handle} post=#{post.id.to_s}")
     push_to_aspects(post, aspects_from_ids(aspect_ids))
 
-    if post.public
+    if post.public && post.respond_to?(:message)
+
+      if opts[:url]
+        message = truncate(post.message, :length => (140 - (opts[:url].length + 1)))
+        message = "#{message} #{opts[:url]}"
+      else
+        message = post.message
+      end
+
       self.services.each do |service|
-        self.send("post_to_#{service.provider}".to_sym, service, post.message)
+        self.send("post_to_#{service.provider}".to_sym, service, message)
       end
     end
   end
 
   def post_to_facebook(service, message)
-    Rails.logger.info("Sending a message: #{message} to Facebook")
-    EventMachine::HttpRequest.new("https://graph.facebook.com/me/feed?message=#{message}&access_token=#{service.access_token}").post
+    Rails.logger.debug("event=post_to_service type=facebook sender_handle=#{self.diaspora_handle}")
+    begin
+      RestClient.post("https://graph.facebook.com/me/feed", :message => message, :access_token => service.access_token)
+    rescue Exception => e
+      Rails.logger.info("#{e.message} failed to post to facebook")
+    end
   end
 
   def post_to_twitter(service, message)
-    oauth = Twitter::OAuth.new(SERVICES['twitter']['consumer_token'], SERVICES['twitter']['consumer_secret'])
-    oauth.authorize_from_access(service.access_token, service.access_secret)
-    client = Twitter::Base.new(oauth)
-    client.update(message)
+    Rails.logger.debug("event=post_to_service type=twitter sender_handle=#{self.diaspora_handle}")
+
+    twitter_key = SERVICES['twitter']['consumer_key']
+    twitter_consumer_secret = SERVICES['twitter']['consumer_secret']
+
+    if twitter_consumer_secret.blank? || twitter_consumer_secret.blank?
+      Rails.logger.info "you have a blank twitter key or secret.... you should look into that"
+    end
+
+    Twitter.configure do |config|
+      config.consumer_key = twitter_key
+      config.consumer_secret = twitter_consumer_secret
+      config.oauth_token = service.access_token
+      config.oauth_token_secret = service.access_secret
+    end
+
+    Twitter.update(message)
+  end
+
+  def post_to_hub(post)
+    Rails.logger.debug("event=post_to_service type=pubsub sender_handle=#{self.diaspora_handle}")
+
+    EventMachine::PubSubHubbub.new(APP_CONFIG[:pubsub_server]).publish self.public_url
   end
 
   def update_post(post, post_hash = {})
@@ -225,7 +255,7 @@ class User
       contacts = contacts | aspect.contacts
     }
 
-    push_to_hub(post) if post.respond_to?(:public) && post.public
+    post_to_hub(post) if post.respond_to?(:public) && post.public
     push_to_people(post, self.person_objects(target_contacts))
   end
 
@@ -242,19 +272,15 @@ class User
     # calling nil? performs a necessary evaluation.
     if person.owner_id
       Rails.logger.info("event=push_to_person route=local sender=#{self.diaspora_handle} recipient=#{person.diaspora_handle} payload_type=#{post.class}")
-      person.owner.receive(post.to_diaspora_xml, self.person)
+      Jobs::Receive.perform(person.owner_id, post.to_diaspora_xml, self.person.id)
     else
       xml = salmon.xml_for person
       Rails.logger.info("event=push_to_person route=remote sender=#{self.diaspora_handle} recipient=#{person.diaspora_handle} payload_type=#{post.class}")
-      QUEUE.add_post_request(person.receive_url, xml)
-      QUEUE.process
+      MessageHandler.add_post_request(person.receive_url, xml)
     end
   end
 
-  def push_to_hub(post)
-    Rails.logger.debug("event=push_to_hub target=#{APP_CONFIG[:pubsub_server]} sender_url=#{self.public_url}")
-    QUEUE.add_hub_notification(APP_CONFIG[:pubsub_server], self.public_url)
-  end
+
 
   def salmon(post)
     created_salmon = Salmon::SalmonSlap.create(self, post.to_diaspora_xml)
@@ -336,20 +362,15 @@ class User
   end
 
   ###Invitations############
-  def invite_user(opts = {})
-    aspect_id = opts.delete(:aspect_id)
-    if aspect_id == nil
-      raise "Must invite into aspect"
-    end
-    aspect_object = self.aspects.find_by_id(aspect_id)
-    if !(aspect_object)
-      raise "Must invite to your aspect"
-    else
-      Invitation.invite(:email => opts[:email],
+  def invite_user(email, aspect_id, invite_message = "")
+    aspect_object = Aspect.first(:user_id => self.id, :id => aspect_id)
+    if aspect_object
+      Invitation.invite(:email => email,
                         :from => self,
                         :into => aspect_object,
-                        :message => opts[:invite_message])
-
+                        :message => invite_message)
+    else
+      false
     end
   end
 
@@ -393,10 +414,10 @@ class User
     self.person = Person.new(opts[:person])
     self.person.diaspora_handle = "#{opts[:username]}@#{APP_CONFIG[:terse_pod_url]}"
     self.person.url = APP_CONFIG[:pod_url]
-    new_key = User.generate_key
-    self.serialized_private_key = new_key
-    self.person.serialized_public_key = new_key.public_key
 
+
+    self.serialized_private_key ||= User.generate_key
+    self.person.serialized_public_key = OpenSSL::PKey::RSA.new(self.serialized_private_key).public_key
     self
   end
 

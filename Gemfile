@@ -13,8 +13,8 @@ gem 'devise-mongo_mapper', :git => 'git://github.com/collectiveidea/devise-mongo
 gem 'devise_invitable','0.3.5'
 
 #Authentication
-gem 'omniauth'
-gem 'twitter', '0.9.12'
+gem 'omniauth', '0.1.6'
+gem 'twitter', :git => 'git://github.com/jnunemaker/twitter.git', :ref => 'ef122bbb280e229ed343'
 
 #Mongo
 gem 'mongo_mapper', :branch => 'rails3', :git => 'git://github.com/jnunemaker/mongomapper.git'
@@ -48,9 +48,13 @@ gem 'mini_magick'
 gem 'aws'
 gem 'fastercsv', :require => false
 gem 'jammit'
-
+gem 'rest-client'
 #Backups
 gem "cloudfiles", :require => false
+
+#Queue
+gem 'resque'
+gem 'SystemTimer' unless RUBY_VERSION.include? "1.9"
 
 group :test, :development do
   gem 'factory_girl_rails'
