@@ -12,18 +12,32 @@ class PeopleController < ApplicationController
     @aspect = :search
 
     @people = Person.search(params[:q]).paginate :page => params[:page], :per_page => 25, :order => 'created_at DESC'
-    @requests = Request.all(:to_id.in => @people.map{|p| p.id}, :from_id => current_user.person.id)
-    
-    #only do it if it is an email address
-    if params[:q].try(:match, Devise.email_regexp)
-      webfinger(params[:q])
-    end
-    
     if @people.count == 1
       redirect_to @people.first
     else
-      respond_with @people
+      @hashes = hashes_for_people(@people, @aspects)
+      #only do it if it is an email address
+      if params[:q].try(:match, Devise.email_regexp)
+        webfinger(params[:q])
+      end
     end
+  end
+  def hashes_for_people people, aspects
+    ids = people.map{|p| p.id}
+    requests = {}
+    Request.all(:to_id.in => ids, :from_id => current_user.person.id).each do |r|
+      requests[r.to_id] = r
+    end
+    contacts = {}
+    Contact.all(:user_id => current_user.id, :person_id.in => ids).each do |contact|
+      contacts[contact.person_id] = contact
+    end
+    people.map{|p|
+      {:person => p,
+        :contact => contacts[p.id],
+        :request => requests[p.id],
+        :aspects => aspects}
+    }
   end
 
   def show
@@ -68,10 +82,13 @@ class PeopleController < ApplicationController
       raw_image = params[:person][:profile].delete(:image)
       params[:profile_image_hash] = { :user_file => raw_image, :to => "all" }
 
-      photo = current_user.post(:photo, params[:profile_image_hash])
-      params[:person][:profile][:image_url] = photo.url(:thumb_large)
-      params[:person][:profile][:image_url_medium] = photo.url(:thumb_medium)
-      params[:person][:profile][:image_url_small] = photo.url(:thumb_small)
+      photo = current_user.build_post(:photo, params[:profile_image_hash])
+      if photo.save!
+
+        params[:person][:profile][:image_url] = photo.url(:thumb_large)
+        params[:person][:profile][:image_url_medium] = photo.url(:thumb_medium)
+        params[:person][:profile][:image_url_small] = photo.url(:thumb_small)
+      end
     end
 
     if current_user.update_profile params[:person][:profile]

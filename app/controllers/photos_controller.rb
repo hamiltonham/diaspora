@@ -104,34 +104,38 @@ class PhotosController < ApplicationController
       photo.destroy
       flash[:notice] = I18n.t 'photos.destroy.notice'
 
+
       if photo.status_message_id
         respond_with :location => photo.status_message
       else
-        respond_with :location => photos_path
+        respond_with :location => person_photos_path(current_user.person)
       end
     else
-      respond_with :location => photos_path
+      respond_with :location => person_photos_path(current_user.person)
     end
 
   end
 
   def show
     @photo = current_user.find_visible_post_by_id params[:id]
-    @parent = @photo.status_message
+    if @photo
+      @parent = @photo.status_message
 
-    #if photo is not an attachment, fetch comments for self
-    unless @parent
-      @parent = @photo
-    end
+      #if photo is not an attachment, fetch comments for self
+      unless @parent
+        @parent = @photo
+      end
 
-    comments_hash = Comment.hash_from_post_ids [@parent.id]
-    person_hash = Person.from_post_comment_hash comments_hash
-    @comment_hashes = comments_hash[@parent.id].map do |comment|
-      {:comment => comment,
-        :person => person_hash[comment.person_id]
-      }
+      comments_hash = Comment.hash_from_post_ids [@parent.id]
+      person_hash = Person.from_post_comment_hash comments_hash
+      @comment_hashes = comments_hash[@parent.id].map do |comment|
+        {:comment => comment,
+          :person => person_hash[comment.person_id]
+        }
+      end
+      @ownership = current_user.owns? @photo
+
     end
-    @ownership = current_user.owns? @photo
 
     respond_with @photo
   end

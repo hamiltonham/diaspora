@@ -35,7 +35,7 @@ class User
 
   validates_presence_of :username
   validates_uniqueness_of :username, :case_sensitive => false
-  validates_format_of :username, :with => /\A[A-Za-z0-9_.]+\z/
+  validates_format_of :username, :with => /\A[A-Za-z0-9_]+\z/
   validates_length_of :username, :maximum => 32
   validates_inclusion_of :language, :in => AVAILABLE_LANGUAGE_CODES
   validates_inclusion_of :grammatical_gender, :in => I18n::Backend::Genderize::known_genders + [nil]
@@ -76,6 +76,7 @@ class User
   end
 
   def self.find_for_authentication(conditions={})
+    conditions[:username] = conditions[:username].downcase
     if conditions[:username] =~ /^([\w\.%\+\-]+)@([\w\-]+\.)+([\w]{2,})$/i # email regex
       conditions[:email] = conditions.delete(:username)
     end
@@ -141,17 +142,6 @@ class User
   end
 
   ######## Posting ########
-  def post(class_name, opts = {})
-    post = build_post(class_name, opts)
-
-    if post.save
-      raise 'MongoMapper failed to catch a failed save' unless post.id
-      add_to_streams(post, opts[:to])
-      dispatch_post(post, :to => opts[:to])
-    end
-    post
-  end
-
   def build_post(class_name, opts = {})
     opts[:person] = self.person
     opts[:diaspora_handle] = opts[:person].diaspora_handle
@@ -273,7 +263,7 @@ class User
     # calling nil? performs a necessary evaluation.
     if person.owner_id
       Rails.logger.info("event=push_to_person route=local sender=#{self.diaspora_handle} recipient=#{person.diaspora_handle} payload_type=#{post.class}")
-      Jobs::Receive.perform(person.owner_id, post.to_diaspora_xml, self.person.id)
+      Resque.enqueue(Jobs::Receive, person.owner_id, post.to_diaspora_xml, self.person.id)
     else
       xml = salmon.xml_for person
       Rails.logger.info("event=push_to_person route=remote sender=#{self.diaspora_handle} recipient=#{person.diaspora_handle} payload_type=#{post.class}")
@@ -281,24 +271,12 @@ class User
     end
   end
 
-
-
   def salmon(post)
     created_salmon = Salmon::SalmonSlap.create(self, post.to_diaspora_xml)
     created_salmon
   end
 
   ######## Commenting  ########
-  def comment(text, options = {})
-    comment = build_comment(text, options)
-
-    if comment.save
-      raise 'MongoMapper failed to catch a failed save' unless comment.id
-      dispatch_comment comment
-    end
-    comment
-  end
-
   def build_comment(text, options = {})
     comment = Comment.new(:person_id => self.person.id,
                           :diaspora_handle => self.person.diaspora_handle,
@@ -321,7 +299,7 @@ class User
       #push DOWNSTREAM (to original audience)
       Rails.logger.info "event=dispatch_comment direction=downstream user=#{self.diaspora_handle} comment=#{comment.id}"
       aspects = aspects_with_post(comment.post_id)
-    
+
       #just socket to local users, as the comment has already
       #been associated and saved by post owner
       #  (we'll push to all of their aspects for now, the comment won't
@@ -385,7 +363,6 @@ class User
       self.password              = opts[:password]
       self.password_confirmation = opts[:password_confirmation]
       self.save!
-      self.person.save!
       invitations_to_me.each{|invitation| invitation.to_request!}
 
       self.reload # Because to_request adds a request and saves elsewhere
