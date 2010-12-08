@@ -3,15 +3,20 @@
 #   the COPYRIGHT file.
 
 module StreamHelper
-
+  GSUB_THIS = "FIUSDHVIUSHDVIUBAIUHAPOIUXJM"
   def comment_toggle(count)
     if count == 0
       link_to "#{t('comments.new_comment.comment').downcase}", '#', :class => "show_post_comments"
-    elsif count < 3
+    elsif count <= 3
       link_to "#{t('stream_helper.hide_comments')} (#{count})", '#', :class => "show_post_comments"
     else
       link_to "#{t('stream_helper.show_comments')} (#{count})", '#', :class => "show_post_comments"
     end
   end
 
+  def new_comment_form(post_id)
+    @form ||= controller.render_to_string(
+      :partial => 'comments/new_comment', :locals => {:post_id => GSUB_THIS})
+    @form.gsub(GSUB_THIS, post_id.to_s)
+  end
 end

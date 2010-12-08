@@ -53,7 +53,7 @@ describe AspectsController do
       it 'takes time' do
         Benchmark.realtime{
           get :index
-        }.should < 3
+        }.should < 2
       end
     end
   end
@@ -66,7 +66,9 @@ describe AspectsController do
     it "assigns aspect, aspect_contacts, and posts" do
       get :show, 'id' => @aspect.id.to_s
       assigns(:aspect).should == @aspect
-      assigns(:aspect_contacts).should == @aspect.contacts
+      achash = @controller.send(:hashes_for_contacts, @aspect.contacts).first
+      assigns(:aspect_contacts).first[:contact].should == achash[:contact]
+      assigns(:aspect_contacts).first[:person].should == achash[:person]
       assigns(:posts).should == []
     end
     it "paginates" do
@@ -153,13 +155,31 @@ describe AspectsController do
     end
   end
 
+  describe "#hashes_for_contacts" do
+    before do
+      @people = []
+      10.times {@people << Factory.create(:person)}
+      @people.each{|p| @user.reload.activate_contact(p, @user.aspects.first.reload)}
+      @hashes = @controller.send(:hashes_for_contacts,@user.reload.contacts)
+      @hash = @hashes.first
+    end
+    it 'has as many hashes as contacts' do
+      @hashes.length.should == @user.contacts.length
+    end
+    it 'has a contact' do
+      @hash[:contact].should == @user.contacts.first
+    end
+    it 'has a person' do
+      @hash[:person].should == @user.contacts.first.person
+    end
+  end
   describe "#hashes_for_aspects" do
     before do
       @people = []
       10.times {@people << Factory.create(:person)}
       @people.each{|p| @user.reload.activate_contact(p, @user.aspects.first.reload)}
       @user.reload
-      @hashes = @controller.send(:hashes_for_aspects, @user.aspects, @user.contacts)
+      @hashes = @controller.send(:hashes_for_aspects, @user.aspects, @user.contacts, :limit => 9)
       @hash = @hashes.first
       @aspect = @user.aspects.first
     end
@@ -175,8 +195,8 @@ describe AspectsController do
       gotten_people = @hash[:people].map{|p| p.diaspora_handle}
       gotten_people.each{|p| desired_people.should include p}
     end
-    it 'has at most 8 people' do
-      @hash[:people].length.should == 8
+    it 'takes a limit on people returned' do
+      @hash[:people].length.should == 9
     end
   end
 
