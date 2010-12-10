@@ -545,7 +545,7 @@ ul.comments
     :top 1em
   :padding 0
   :background
-    :color rgba(10,81,109,0.05)
+    :color #F0F4F5
 
   textarea
     :width 100%
@@ -775,32 +775,9 @@ label
     :shadow 0 1px 1px #eee
 
 #file-upload
-  :z-index 10
-  :float right
-  :height 34px
-  :width 70px
-  :margin 0
-  :background
-    :color #107FC9
-
-  :-webkit-border-radius 5px
-  :-moz-border-radius 5px
-  :border-radius 5px 
-
-  :background -webkit-gradient( linear, left bottom, left top, color-stop(0, rgb(0,123,194)), color-stop(1, rgb(65,182,250)))
-  :background -moz-linear-gradient( center bottom, rgb(0,123,194) 0%, rgb(65,182,250) 100%)
-
-  :padding 9px
-
-  :font
-    :size 16px
-    :weight bold
-  :color #eee
-  :text-shadow 0 1px 0 #333
-
-  &.loading
-    :opacity 0.5
-
+  input
+    :height 100%
+    :width 100%
 
 #publisher
   :background
@@ -907,8 +884,33 @@ label
       :position absolute
       :top 5px
 
-#file_upload
-  :z-index 10
+  #file-upload
+    :z-index 10
+    :float right
+    :height 34px
+    :width 70px
+    :margin 0
+    :background
+      :color #107FC9
+
+    :-webkit-border-radius 5px
+    :-moz-border-radius 5px
+    :border-radius 5px
+
+    :background -webkit-gradient( linear, left bottom, left top, color-stop(0, rgb(0,123,194)), color-stop(1, rgb(65,182,250)))
+    :background -moz-linear-gradient( center bottom, rgb(0,123,194) 0%, rgb(65,182,250) 100%)
+
+    :padding 9px
+
+    :font
+      :size 16px
+      :weight bold
+    :color #eee
+    :text-shadow 0 1px 0 #333
+
+    &.loading
+      :opacity 0.5
+
 .field_with_submit
   input[type='text']
     :width 82%
@@ -928,33 +930,36 @@ label
 
 #aspect_nav
   :margin
-    :top 4px
+    :top 8px
+    :bottom 0
+  :bottom 0
   :color #000
 
   ul
-    :margin 0
+    :position relative
     :padding 0
+      :bottom 3px
+    :margin
+      :bottom 0
 
     > li
-      :padding 0
       :display inline
+      :margin 0
+      :padding 4px 0
       a
-        :-webkit-border-radius 4px 4px 0 0 
-        :-moz-border-radius 4px 4px 0 0 
-        :border-radius 4px 4px 0 0 
+        :-webkit-border-radius 3px 3px 0 0
+        :-moz-border-radius 3px 3px 0 0
+        :border-radius 3px 3px 0 0
 
         :text-shadow 0 1px 0 #444
-        :line
-          :height 22px
 
-        :padding 3px 10px
+        :padding 4px 10px
+        :margin
+          :left -1px
         :color #CCC
         :max-width 120px
         :overflow hidden
         :text-overflow ellipsis
-
-        :background
-          :color #222
 
         &:hover
           :background
@@ -963,13 +968,10 @@ label
 
       &.selected a
         :text-shadow 0 1px 0 #eee
-        :padding
-          :top 4px
-          :bottom 5px
-        :line
-          :height 18px
         :font
           :weight bold
+        :padding
+          :bottom 6px
         :background
           :color rgb(252,252,252)
 
@@ -1155,6 +1157,10 @@ label
         .circle
           :background
             :color rgba(208,49,43,1)
+
+.requests
+  :position fixed
+  :background-color rgb(252,252,252)
 
 .aspect
   :margin
@@ -1414,6 +1420,8 @@ ul.aspects
 .floating
   :position relative
   :padding 12px
+  :margin
+    :bottom 2em
   :background
     :color rgb(255,255,255)
 
@@ -1957,3 +1965,17 @@ h3,h4
 #edit_aspect_trigger
   :font
     :size 12px
+
+.stream
+  .public_badge
+    :position absolute
+    :top 60px
+    :left 25px
+
+.message.public
+  :background
+    :color #FEFFF0
+
+  &:hover
+    :background
+      :color #FEFFE3

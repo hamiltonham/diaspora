@@ -2,6 +2,9 @@
 -#   licensed under the Affero General Public License version 3 or later.  See
 -#   the COPYRIGHT file.
 
+- content_for :page_title do
+  = t('.edit_services')
+
 #section_header
   %h2
     = t('settings')
@@ -21,7 +24,7 @@
         = t('.logged_in_as')
         %b
           = service.nickname
-        = link_to t('.disconnect'), service, :confirm => t('.really_disconnect', :service => service.provider), :method => :delete
+        = link_to t('.disconnect'), service_path(service), :confirm => t('.really_disconnect', :service => service.provider), :method => :delete
 
   %h4= link_to image_tag('services/twitter_sign_in.png'), "/auth/twitter" if SERVICES['twitter']['consumer_key']!= ""
   %h4= link_to image_tag('services/facebook_sign_in.png'), "/auth/facebook" if SERVICES['facebook']['app_id'] !=""

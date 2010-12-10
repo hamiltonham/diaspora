@@ -13,7 +13,7 @@ describe Request do
 
   describe 'validations' do
     before do
-      @request = Request.instantiate(:from => user.person, :to => user2.person, :into => aspect) 
+      @request = Request.instantiate(:from => user.person, :to => user2.person, :into => aspect)
     end
     it 'is valid' do
       @request.should be_valid
@@ -43,14 +43,14 @@ describe Request do
     end
 
     it 'is not to yourself' do
-      @request = Request.instantiate(:from => user.person, :to => user.person, :into => aspect) 
+      @request = Request.instantiate(:from => user.person, :to => user.person, :into => aspect)
       @request.should_not be_valid
     end
   end
 
   describe 'scopes' do
     before do
-      @request = Request.instantiate(:from => user.person, :to => user2.person, :into => aspect) 
+      @request = Request.instantiate(:from => user.person, :to => user2.person, :into => aspect)
       @request.save
     end
     describe '.from' do
@@ -84,7 +84,7 @@ describe Request do
       user.request_from_me?(request).should be_true
     end
 
-    it 'recognized when a request is not from me' do 
+    it 'recognized when a request is not from me' do
       user2.request_from_me?(request).should be_false
     end
   end
@@ -108,9 +108,29 @@ describe Request do
     end
   end
 
+  describe '.hashes_for_person' do
+    before do
+      @user = make_user
+      @user2 = make_user
+      @user2.send_contact_request_to @user.person, @user2.aspects.create(:name => "hi")
+      @user.reload
+      @user2.reload
+      @hashes = Request.hashes_for_person(@user.person)
+      @hash = @hashes.first
+    end
+    it 'gives back requests' do
+      @hash[:request].should == Request.from(@user2).to(@user).first(:sent => false)
+    end
+    it 'gives back people' do
+      @hash[:sender].should == @user2.person
+    end
+    it 'does not retrieve keys' do
+      @hash[:sender].serialized_public_key.should be_nil
+    end
+  end
   describe 'xml' do
     before do
-      @request = Request.new(:from => user.person, :to => user2.person, :into => aspect) 
+      @request = Request.new(:from => user.person, :to => user2.person, :into => aspect)
       @xml = @request.to_xml.to_s
     end
     describe 'serialization' do

@@ -26,12 +26,15 @@ describe PeopleController do
       user.activate_contact(@everyone[4], aspect)
       user.activate_contact(@everyone[5], aspect)
 
-      @people = Person.search('eugene')
+      user.reload
+      user.aspects.reload
+      @people = @everyone
       @people.length.should == 10
       @hashes = @controller.hashes_for_people(@people, user.aspects)
     end
     it 'has the correct result for no relationship' do
       hash = @hashes.first
+
       hash[:person].should == @people.first
       hash[:contact].should be_false
       hash[:request].should be_false
@@ -137,6 +140,14 @@ describe PeopleController do
       get :show, :id => user2.person.id
       response.should be_success
     end
+
+    it "renders with public posts of a non-contact" do
+      user2 = make_user
+      status_message = user2.post(:status_message, :message => "hey there", :to => 'all', :public => true)
+
+      get :show, :id => user2.person.id
+      response.body.should include status_message.message
+    end
   end
 
   describe '#webfinger' do
@@ -148,53 +159,43 @@ describe PeopleController do
 
   describe '#update' do
     it "sets the flash" do
-      put :update, "id" => user.person.id.to_s, "person" => {
-        "profile" => {
-          "image_url" => "",
-          "last_name" => "Smith",
-          "first_name" => "Will"
+      put :update, :id => user.person.id,
+        :profile => {
+          :image_url  => "",
+          :first_name => "Will",
+          :last_name  => "Smith"
         }
-      }
       flash[:notice].should_not be_empty
     end
 
     context 'with a profile photo set' do
       before do
-        @params = { :profile =>
-                   { :image_url => "",
-                     :last_name  => user.person.profile.last_name,
-                     :first_name => user.person.profile.first_name }}
+        @params = { :id => user.person.id,
+                    :profile =>
+                     {:image_url => "",
+                      :last_name  => user.person.profile.last_name,
+                      :first_name => user.person.profile.first_name }}
 
         user.person.profile.image_url = "http://tom.joindiaspora.com/images/user/tom.jpg"
         user.person.profile.save
       end
       it "doesn't overwrite the profile photo when an empty string is passed in" do
         image_url = user.person.profile.image_url
-        put :update, :id => user.person.id.to_s, :person => @params
+        put :update, @params
 
         user.person.reload
         user.person.profile.image_url.should == image_url
       end
-      it 'updates a profile photo url' do
-        fixture_name = File.dirname(__FILE__) + '/../fixtures/button.png'
-        photo = user.post(:photo, :user_file => File.open(fixture_name), :to => aspect.id)
-        @params[:profile][:image_url] = photo.url(:thumb_medium)
-        put :update, :id => user.person.id, :person => @params
-        goal_pod_url = (APP_CONFIG[:pod_url][-1,1] == '/' ? APP_CONFIG[:pod_url].chop : APP_CONFIG[:pod_url])
-        user.person.reload.profile.image_url.should ==
-          "#{goal_pod_url}#{photo.url(:thumb_medium)}"
-      end
     end
     it 'does not allow mass assignment' do
       new_user = make_user
-      put :update, :id => user.person.id, :person => {
-        :owner_id => new_user.id}
+      put :update, :id => user.person.id, :owner_id => new_user.id
       user.person.reload.owner_id.should_not == new_user.id
     end
 
     it 'does not overwrite the profile diaspora handle' do
-      handle_params = {'profile' => {'diaspora_handle' => 'abc@a.com'}}
-      put :update, :id => user.person.id, :person => handle_params
+      handle_params = {:id => user.person.id, :profile => {:diaspora_handle => 'abc@a.com'}}
+      put :update, handle_params
       user.person.reload.profile[:diaspora_handle].should_not == 'abc@a.com'
     end
   end

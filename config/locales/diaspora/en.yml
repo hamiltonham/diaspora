@@ -179,6 +179,10 @@ en:
           download_photos: "download my photos"
           your_handle: "Your diaspora handle"
           your_email: "Your email"
+          edit_account: "Edit account"
+          email_notifications: "Email notificaions"
+          receive_email_notifications: "Receive email notificaions?"
+          change: "Change"
       destroy: "Account successfully closed."
       getting_started:
           welcome: "Welcome to Diaspora!"
@@ -213,6 +217,7 @@ en:
           password_not_changed: "Password Change Failed"
           language_changed: "Language Changed"
           language_not_changed: "Language Change Failed"
+          email_notifications_changed: "Language Change Failed"
       public:
           does_not_exist: "User %{username} does not exist!"
   comments:
@@ -250,6 +255,9 @@ en:
           invalid_ext: "{file} has invalid extension. Only {extensions} are allowed."
           size_error: "{file} is too large, maximum file size is {sizeLimit}."
           empty: "{file} is empty, please select files again without it."
+      new_profile_photo:
+          upload: "Upload a new profile photo!"
+          or_select_one: "or select one from your already existing"
   registrations:
       new:
           sign_up: "Sign up"
@@ -305,6 +313,7 @@ en:
           add_contact: "add contact"
       index:
           results_for: "search results for"
+          no_results: "Hey! You need to search for something."
       webfinger:
           fail: "Sorry, we couldn't find %{handle}."
       show:
@@ -317,6 +326,7 @@ en:
           does_not_exist: "Person does not exist!"
           not_connected: "You are not connected with this person"
           recent_posts: "Recent Posts"
+          recent_public_posts: "Recent Public Posts"
       edit:
           info_available_to: "This info will be available to whomever you connect with on Diaspora."
           your_profile: "Your profile"
@@ -329,8 +339,7 @@ en:
           your_photo: "Your photo"
           update_profile: "Update Profile"
           allow_search: "Allow for people to search for you within Diaspora"
-      profile_photo_upload:
-          or_select_one: "or select one from your already existing"
+          edit_profile: "Edit profile"
       update:
           updated: "Profile updated"
           failed: "Failed to update profile"
@@ -366,6 +375,7 @@ en:
         really_disconnect: "disconnect %{service}?"
         connect_to_twitter: "Connect to twitter"
         connect_to_facebook: "Connect to facebook"
+        edit_services: "Edit services"
       create:
           success: "Authentication successful."
       destroy:

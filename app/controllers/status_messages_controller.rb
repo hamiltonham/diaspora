@@ -18,7 +18,7 @@ class StatusMessagesController < ApplicationController
 
     public_flag = params[:status_message][:public]
     public_flag.to_s.match(/(true)/) ? public_flag = true : public_flag = false
-    params[:status_message][:public] = public_flag 
+    params[:status_message][:public] = public_flag
     @status_message = current_user.build_post(:status_message, params[:status_message])
 
 
@@ -40,13 +40,13 @@ class StatusMessagesController < ApplicationController
       respond_to do |format|
         format.js{ render :json => { :post_id => @status_message.id,
                                      :html => render_to_string(
-                                       :partial => 'shared/stream_element', 
+                                       :partial => 'shared/stream_element',
                                        :locals => {
-                                         :post => @status_message, 
+                                         :post => @status_message,
                                          :person => @status_message.person,
                                          :photos => @status_message.photos,
                                          :comments => [],
-                                         :aspects => current_user.aspects, 
+                                         :aspects => current_user.aspects,
                                          :current_user => current_user
                                         }
                                      )

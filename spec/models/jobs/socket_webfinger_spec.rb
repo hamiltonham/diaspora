@@ -1,4 +1,4 @@
-require 'spec/spec_helper'
+require File.join(Rails.root, 'spec/spec_helper')
 
 describe Jobs::SocketWebfinger do
   before do
@@ -39,8 +39,7 @@ describe Jobs::SocketWebfinger do
     finger = mock()
     Webfinger.stub(:new).and_return(finger)
     finger.stub(:fetch).and_raise(Webfinger::WebfingerFailedError)
-
-    opts = {:class => 'people', :status => 'fail', :query => @account, :response => I18n.t('people.webfinger.fail')}.to_json
+    opts = {:class => 'people', :status => 'fail', :query => @account, :response => I18n.t('people.webfinger.fail', :handle => @account )}.to_json
     Diaspora::WebSocket.should_receive(:queue_to_user).with(@user.id, opts)
     Jobs::SocketWebfinger.perform(@user.id, @account)
 

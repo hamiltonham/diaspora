@@ -5,6 +5,9 @@
 - content_for :head do
   = include_javascripts :aspects
 
+- content_for :page_title do
+  = t('.manage_aspects')
+
 #section_header
   %h2=t('.manage_aspects')
   .right{:style=>"top:0;"}
@@ -12,9 +15,8 @@
 
 #manage_aspect_zones
   .span-4.append-1.last
-    %h3=t('.requests')
-
     .requests
+      %h3=t('.requests')
       %i
         %p= "#{t('.drag_to_add')} =>"
 
@@ -22,15 +24,18 @@
         - if @remote_requests.size < 1
           %li=t('.no_requests')
         - else
-          - for request in @remote_requests
-            %li.person.request{:data=>{:guid=>request.id, :person_id=>request.from.id}}
+          - for hash in @remote_requests
+            %li.person.request{:data=>{:guid=>hash[:request].id, :person_id=>hash[:sender].id}}
               .delete
                 .x
                   X
                 .circle
-              = link_to person_image_tag(request.from), request.from
+              = link_to person_image_tag(hash[:sender]), hash[:sender]
 
-    = render 'shared/invitations', :invites => @invites
+      = render 'shared/invitations', :invites => @invites
+
+    %div{:style=>"color:rgb(252,252,252);"}
+      \.
 
   .span-19.last
     - for hash in @aspect_hashes

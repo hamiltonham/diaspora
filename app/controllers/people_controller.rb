@@ -43,18 +43,20 @@ class PeopleController < ApplicationController
   def show
     @person = Person.find(params[:id].to_id)
     @post_type = :all
-    @aspect = :none 
+
     if @person
       @profile = @person.profile
       @contact = current_user.contact_for(@person)
-      @is_contact = @person != current_user.person && @contact
 
       if @contact
         @aspects_with_person = @contact.aspects
       end
 
-      @posts = current_user.visible_posts(:person_id => @person.id, :_type => "StatusMessage").paginate :page => params[:page], :order => 'created_at DESC'
+      @commenting_disabled = (current_user.person.id != @person.id) && !@contact
+
+      @posts = current_user.posts_from(@person).paginate :page => params[:page]
       @post_hashes = hashes_for_posts @posts
+
       respond_with @person, :locals => {:post_type => :all}
 
     else
@@ -75,23 +77,12 @@ class PeopleController < ApplicationController
   end
 
   def update
-
     # upload and set new profile photo
-    params[:person][:profile] ||= {}
-    if params[:person][:profile][:image].present?
-      raw_image = params[:person][:profile].delete(:image)
-      params[:profile_image_hash] = { :user_file => raw_image, :to => "all" }
+    params[:profile] ||= {}
+    params[:profile][:searchable] ||= false
+    params[:profile][:photo] = Photo.first(:person_id => current_user.person.id, :id => params[:photo_id]) if params[:photo_id]
 
-      photo = current_user.build_post(:photo, params[:profile_image_hash])
-      if photo.save!
-
-        params[:person][:profile][:image_url] = photo.url(:thumb_large)
-        params[:person][:profile][:image_url_medium] = photo.url(:thumb_medium)
-        params[:person][:profile][:image_url_small] = photo.url(:thumb_small)
-      end
-    end
-
-    if current_user.update_profile params[:person][:profile]
+    if current_user.update_profile params[:profile]
       flash[:notice] = I18n.t 'people.update.updated'
     else
       flash[:error] = I18n.t 'people.update.failed'
@@ -132,6 +123,7 @@ class PeopleController < ApplicationController
       }
     end
   end
+
   def webfinger(account, opts = {})
     Resque.enqueue(Jobs::SocketWebfinger, current_user.id, account, opts)
   end

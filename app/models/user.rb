@@ -5,11 +5,11 @@
 require File.join(Rails.root, 'lib/diaspora/user')
 require File.join(Rails.root, 'lib/salmon/salmon')
 require 'rest-client'
+
 class User
   include MongoMapper::Document
   include Diaspora::UserModules
   include Encryptor::Private
-  include ActionView::Helpers::TextHelper
 
   plugin MongoMapper::Devise
 
@@ -26,6 +26,7 @@ class User
   key :visible_person_ids, Array, :typecast => 'ObjectId'
 
   key :getting_started, Boolean, :default => true
+  key :disable_mail, Boolean, :default => false
 
   key :language, String
 
@@ -60,7 +61,7 @@ class User
     person.save if person
   end
 
-  attr_accessible :getting_started, :password, :password_confirmation, :language,
+  attr_accessible :getting_started, :password, :password_confirmation, :language, :disable_mail
 
   def strip_and_downcase_username
     if username.present?
@@ -151,58 +152,21 @@ class User
   def dispatch_post(post, opts = {})
     aspect_ids = opts.delete(:to)
 
-    #socket post
     Rails.logger.info("event=dispatch user=#{diaspora_handle} post=#{post.id.to_s}")
     push_to_aspects(post, aspects_from_ids(aspect_ids))
+    Resque.enqueue(Jobs::PostToServices, self.id, post.id, opts[:url]) if post.public
+  end
 
-    if post.public && post.respond_to?(:message)
-
-      if opts[:url] && post.photos.count > 0
-
-        message = truncate(post.message, :length => (140 - (opts[:url].length + 1)))
-        message = "#{message} #{opts[:url]}"
-      else
-        message = post.message
-      end
-
+  def post_to_services(post, url)
+    if post.respond_to?(:message)
       self.services.each do |service|
-        self.send("post_to_#{service.provider}".to_sym, service, message)
+        service.post(post, url)
       end
     end
-  end
-
-  def post_to_facebook(service, message)
-    Rails.logger.debug("event=post_to_service type=facebook sender_handle=#{self.diaspora_handle}")
-    begin
-      RestClient.post("https://graph.facebook.com/me/feed", :message => message, :access_token => service.access_token)
-    rescue Exception => e
-      Rails.logger.info("#{e.message} failed to post to facebook")
-    end
-  end
-
-  def post_to_twitter(service, message)
-    Rails.logger.debug("event=post_to_service type=twitter sender_handle=#{self.diaspora_handle}")
-
-    twitter_key = SERVICES['twitter']['consumer_key']
-    twitter_consumer_secret = SERVICES['twitter']['consumer_secret']
-
-    if twitter_consumer_secret.blank? || twitter_consumer_secret.blank?
-      Rails.logger.info "you have a blank twitter key or secret.... you should look into that"
-    end
-
-    Twitter.configure do |config|
-      config.consumer_key = twitter_key
-      config.consumer_secret = twitter_consumer_secret
-      config.oauth_token = service.access_token
-      config.oauth_token_secret = service.access_secret
-    end
-
-    Twitter.update(message)
   end
 
   def post_to_hub(post)
     Rails.logger.debug("event=post_to_service type=pubsub sender_handle=#{self.diaspora_handle}")
-
     EventMachine::PubSubHubbub.new(APP_CONFIG[:pubsub_server]).publish self.public_url
   end
 
@@ -240,9 +204,10 @@ class User
 
   def push_to_aspects(post, aspects)
     #send to the aspects
-    target_contacts = aspects.inject([]) { |contacts,aspect|
-      contacts = contacts | aspect.contacts
-    }
+    #
+    target_aspect_ids = aspects.map {|a| a.id}
+
+    target_contacts = Contact.all(:aspect_ids.in => target_aspect_ids)
 
     post_to_hub(post) if post.respond_to?(:public) && post.public
     push_to_people(post, self.person_objects(target_contacts))
@@ -317,6 +282,13 @@ class User
     end
   end
 
+  ######### Mailer #######################
+  def mail(job, *args)
+    unless self.disable_mail
+      Resque.enqueue(job, *args)
+    end
+  end
+
   ######### Posts and Such ###############
   def retract(post)
     aspect_ids = aspects_with_post(post.id)
@@ -330,8 +302,14 @@ class User
 
   ########### Profile ######################
   def update_profile(params)
+    if params[:photo]
+      params[:photo].update_attributes(:pending => false) if params[:photo].pending
+      params[:image_url] = params[:photo].url
+      params[:image_url_medium] = params[:photo].url(:thumb_medium)
+      params[:image_url_small] = params[:photo].url(:thumb_small)
+    end
     if self.person.profile.update_attributes(params)
-      push_to_aspects profile, aspects
+      push_to_people profile, self.person_objects(contacts)
       true
     else
       false
@@ -387,7 +365,7 @@ class User
     opts[:person][:profile] ||= Profile.new
 
     self.person = Person.new(opts[:person])
-    self.person.diaspora_handle = "#{opts[:username]}@#{APP_CONFIG[:terse_pod_url]}"
+    self.person.diaspora_handle = "#{opts[:username]}@#{APP_CONFIG[:pod_uri].host}"
     self.person.url = APP_CONFIG[:pod_url]
 
 
@@ -397,23 +375,10 @@ class User
     self
   end
 
-
   def seed_aspects
     self.aspects.create(:name => I18n.t('aspects.seed.family'))
     self.aspects.create(:name => I18n.t('aspects.seed.work'))
   end
-
-  def as_json(opts={})
-    {
-      :user => {
-        :posts            => self.raw_visible_posts.each { |post| post.as_json },
-        :contacts         => self.contacts.each { |contact| contact.as_json },
-        :aspects          => self.aspects.each { |aspect| aspect.as_json },
-        :pending_requests => self.pending_requests.each { |request| request.as_json },
-      }
-    }
-  end
-
 
   def self.generate_key
     key_size = (Rails.env == 'test' ? 512 : 4096)

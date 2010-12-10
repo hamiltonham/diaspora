@@ -19,17 +19,18 @@ class ServicesController < ApplicationController
     provider = auth['provider']
     user     = auth['user_info']
 
-    current_user.services.create(:nickname => user['nickname'],
-                                 :access_token => toke,
-                                 :access_secret => secret,
-                                 :provider => provider,
-                                 :uid => auth['uid'])
+    service = "Services::#{provider.camelize}".constantize.new(:nickname => user['nickname'],
+                                                               :access_token => toke,
+                                                               :access_secret => secret,
+                                                               :provider => provider,
+                                                               :uid => auth['uid'])
+    current_user.services << service
 
     flash[:notice] = I18n.t 'services.create.success'
     if current_user.getting_started
       redirect_to  getting_started_path(:step => 3)
     else
-      redirect_to services_url 
+      redirect_to services_url
     end
   end
 
