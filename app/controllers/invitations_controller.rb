@@ -6,6 +6,10 @@ class InvitationsController < Devise::InvitationsController
 
   before_filter :check_token, :only => [:edit]
 
+  def new
+    sent_invitations = current_user.invitations_from_me.fields(:to_id).all
+    @emails_delivered = sent_invitations.map!{ |i| i.to.email }
+  end
 
   def create
       if current_user.invites == 0
@@ -15,7 +19,7 @@ class InvitationsController < Devise::InvitationsController
       end
       aspect = params[:user].delete(:aspects)
       message = params[:user].delete(:invite_messages)
-      emails = params[:user][:email].split(/, */)
+      emails = params[:user][:email].to_s.gsub(/\s/, '').split(/, */)
 
       good_emails, bad_emails = emails.partition{|e| e.try(:match, Devise.email_regexp)}
 

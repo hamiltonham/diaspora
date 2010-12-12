@@ -15,7 +15,7 @@ en:
   cancel: "Cancel"
   delete: "Delete"  
   or: "or"
-  ago: "ago"
+  ago: "%{time} ago"
   username: "Username"
   email: "Email"
   password: "Password"
@@ -58,6 +58,8 @@ en:
           unknown_person: "unknown person"
           youtube_title:
               unknown: "Unknown Video Title"
+          aspect_badge:
+              all_aspects: "All aspects"
   error_messages:
       helper:
           invalid_fields: "Invalid Fields"
@@ -292,6 +294,7 @@ en:
           send_an_invitation: "Send an invitation"
           send_invitation: "Send invitation"
           aspect: "Aspect"
+          already_invited: "Already invited"
       check_token:
           not_found: "Invitation token not found"
       edit:
@@ -314,6 +317,8 @@ en:
       index:
           results_for: "search results for"
           no_results: "Hey! You need to search for something."
+          couldnt_find_them_send_invite: "Couldn't find them?  Send an invite!"
+          no_one_found: "...and no one was found."
       webfinger:
           fail: "Sorry, we couldn't find %{handle}."
       show:

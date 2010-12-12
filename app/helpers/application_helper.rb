@@ -29,6 +29,16 @@ module ApplicationHelper
       post.aspect_ids.include?(a.id)
     end
   end
+  def aspect_badge aspects
+    str = ''
+    if aspects.count > 1
+      str = "<span class='aspect_badge all'>#{I18n.t('application.helper.aspect_badge.all_aspects')}</span>"
+    elsif aspects.count == 1
+      aspect = aspects.first
+      str = "<span class='aspect_badge single'><a href=#{aspect_path(aspect)}>#{aspect.name}</a></span>"
+    end
+    str.html_safe
+  end
   def aspect_links aspects, opts={}
     str = ""
     aspects.each do |a|
@@ -62,7 +72,7 @@ module ApplicationHelper
       aspects_path
     end
   end
-  
+
   def object_path(object, opts = {})
     return "" if object.nil?
     object = object.person if object.is_a? User
@@ -83,7 +93,7 @@ module ApplicationHelper
   end
 
   def how_long_ago(obj)
-    "#{time_ago_in_words(obj.created_at, true)} #{t('ago')}"
+    I18n.t('ago', :time => time_ago_in_words(obj.created_at, true))
   end
 
   def person_url(person)
@@ -155,7 +165,7 @@ module ApplicationHelper
   def markdownify(message, options = {})
     message = h(message).html_safe
 
-    [:autolinks, :youtube, :emphasis, :links].each do |k|
+    [:autolinks, :youtube, :emphasis, :links, :newlines].each do |k|
       if !options.has_key?(k)
         options[k] = true
       end
@@ -219,6 +229,10 @@ module ApplicationHelper
         end
         message.gsub!('youtube.com::'+video_id, '<a class="video-link" data-host="youtube.com" data-video-id="' + video_id + '" href="#video">Youtube: ' + title + '</a>')
       end
+    end
+
+    if options[:newlines]
+      message.gsub!(/\n+/, '<br />')
     end
 
     return message
