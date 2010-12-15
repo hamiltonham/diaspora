@@ -124,6 +124,8 @@ en:
       contact_list:
           all_contacts: "All contacts"
           cannot_remove: "Cannot remove person from last aspect. (If you want to disconnect from this person you must remove contact.)"
+      stream_element:
+          like: "like"
   aspects:
       all_aspects_contacts:
           all_contacts: "All contacts"
@@ -457,3 +459,5 @@ en:
   pagination:
       next: "Next"
       previous: "Previous"
+  like: "likes this"
+  dislike: "dislikes this"
