@@ -17,7 +17,6 @@ class ApplicationController < ActionController::Base
       @aspect = nil
       @aspects = current_user.aspects.fields(:name)
       @aspects_dropdown_array = @aspects.collect{|x| [x.to_s, x.id]}
-      @contacts = current_user.contacts
     end
   end
 
@@ -32,7 +31,7 @@ class ApplicationController < ActionController::Base
   end
 
   def count_requests
-    @request_count = current_user.requests_for_me.count if current_user
+    @request_count = Request.to(current_user.person).count if current_user
   end
 
   def set_invites

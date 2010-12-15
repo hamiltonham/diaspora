@@ -29,22 +29,25 @@ class RequestsController < ApplicationController
 
  def create
    aspect = current_user.aspect_by_id(params[:request][:into])
-   account = params[:request][:to].strip  
+   account = params[:request][:to].strip
    person = Person.by_account_identifier(account)
-   existing_request = Request.from(person).to(current_user.person).where(:sent => false).first if person
+   existing_request = Request.from(person).to(current_user.person).first if person
    if existing_request
      current_user.accept_and_respond(existing_request.id, aspect.id)
      redirect_to :back
    else
-     @request = Request.instantiate(:to => person,
-                                    :from => current_user.person,
-                                    :into => aspect)
-     if @request.save
-       current_user.dispatch_request(@request)
+
+     @contact = Contact.new(:user => current_user,
+                            :person => person,
+                            :aspect_ids => [aspect.id],
+                            :pending => true)
+
+     if @contact.save
+       @contact.dispatch_request
        flash.now[:notice] = I18n.t('requests.create.sent')
        redirect_to :back
      else
-       flash.now[:error] = @request.errors.full_messages.join(', ')
+       flash.now[:error] = @contact.errors.full_messages.join(', ')
        redirect_to :back
      end
    end

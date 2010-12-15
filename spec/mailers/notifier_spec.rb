@@ -4,7 +4,6 @@ require 'spec_helper'
 describe Notifier do
 
   let!(:user) {make_user}
-  let!(:aspect) {user.aspects.create(:name => "science")}
   let!(:person) {Factory.create :person}
 
   before do
@@ -14,7 +13,7 @@ describe Notifier do
     it 'mails a user' do
       mails = Notifier.admin("Welcome to bureaucracy!", [user])
       mails.length.should == 1
-      mail = Notifier.deliveries.first
+      mail = mails.first
       mail.to.should == [user.email]
       mail.body.encoded.should match /Welcome to bureaucracy!/
       mail.body.encoded.should match /#{user.username}/
@@ -24,8 +23,7 @@ describe Notifier do
       5.times do 
         users << make_user
       end
-      Notifier.admin("Welcome to bureaucracy!", users)
-      mails = Notifier.deliveries
+      mails = Notifier.admin("Welcome to bureaucracy!", users)
       mails.length.should == 5
       mails.each{|mail|
         this_user = users.detect{|u| mail.to == [u.email]}
@@ -64,8 +62,8 @@ describe Notifier do
     end
   end
 
-  describe "#request_accpeted" do
-    let!(:request_accepted_mail) {Notifier.request_accepted(user.id, person.id, aspect.id)}
+  describe "#request_accepted" do
+    let!(:request_accepted_mail) {Notifier.request_accepted(user.id, person.id)}
     it 'goes to the right person' do
       request_accepted_mail.to.should == [user.email]
     end
@@ -74,13 +72,8 @@ describe Notifier do
       request_accepted_mail.body.encoded.include?(user.person.profile.first_name).should be true
     end
 
-
     it 'has the name of person sending the request' do
       request_accepted_mail.body.encoded.include?(person.name).should be true
-    end
-
-    it 'has the name of the aspect in the body' do
-      request_accepted_mail.body.encoded.include?(aspect.name).should be true
     end
   end
 end

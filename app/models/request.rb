@@ -2,9 +2,9 @@
 #   licensed under the Affero General Public License version 3 or later.  See
 #   the COPYRIGHT file.
 
-class Request  
+class Request
   require File.join(Rails.root, 'lib/diaspora/webhooks')
-  
+
   include MongoMapper::Document
   include Diaspora::Webhooks
   include ROXML
@@ -15,19 +15,18 @@ class Request
   belongs_to :into, :class => Aspect
   belongs_to :from, :class => Person
   belongs_to :to,   :class => Person
-  key :sent,                  Boolean, :default => false
 
   validates_presence_of :from, :to
   validate :not_already_connected_if_sent
   validate :not_already_connected_if_not_sent
   validate :no_pending_request, :if => :sent
   validate :not_friending_yourself
-  
+
   scope :from, lambda { |person| 
     target = (person.is_a?(User) ? person.person : person)
     where(:from_id => target.id)
   }
-  
+
   scope :to, lambda { |person| 
     target = (person.is_a?(User) ? person.person : person)
     where(:to_id => target.id)
@@ -69,7 +68,7 @@ class Request
   end
 
   def self.hashes_for_person person
-    requests = Request.to(person).all(:sent => false)
+    requests = Request.to(person).all
     senders = Person.all(:id.in => requests.map{|r| r.from_id}, :fields => [:profile])
     senders_hash = {}
     senders.each{|sender| senders_hash[sender.id] = sender}

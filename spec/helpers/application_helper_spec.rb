@@ -208,8 +208,36 @@ describe ApplicationHelper do
         res = markdownify(message)
         res.should == "These<br /\>are<br /\>some<br /\>new<br /\>lines"
       end
+
+      it 'should render newlines and basic http links correctly' do
+        message = "Some text, then a line break and a link\nhttp://joindiaspora.com\nsome more text"
+        res = markdownify(message)
+        res.should == 'Some text, then a line break and a link<br /><a target="_blank" href="http://joindiaspora.com">joindiaspora.com</a><br />some more text'
+      end
     end
 
+    describe '#person_link' do
+      before do
+      @person = Factory(:person)
+      end
+      it 'includes the name of the person if they have a first name' do
+        person_link(@person).should include @person.profile.first_name
+      end
+
+      it 'uses diaspora handle if the person has no first or last name' do
+        @person.profile.first_name = nil
+        @person.profile.last_name = nil
+
+        person_link(@person).should include @person.diaspora_handle
+      end
+
+      it 'uses diaspora handle if first name and first name are rails#blank?' do
+        @person.profile.first_name = " "
+        @person.profile.last_name = " "
+
+        person_link(@person).should include @person.diaspora_handle
+      end
+    end
     context 'performance' do
       before do
         @message = "HHello,Hello_, I _am a strong robot.*Hello, I am *a strong robot.Hello, I am a strong robot.Hello, I am a strong robot.Hello, I am a strong robot.Hello, I am a **strong robot.Hello, I am _a _strong *robot**.Hello*, I am a strong "

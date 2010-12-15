@@ -11,11 +11,12 @@ class AspectsController < ApplicationController
   def index
     @posts  = current_user.visible_posts(:_type => "StatusMessage").paginate :page => params[:page], :per_page => 15, :order => 'created_at DESC'
     @post_hashes = hashes_for_posts @posts
+    @contacts = current_user.contacts(:pending => false)
     @aspect_hashes = hashes_for_aspects @aspects.all, @contacts, :limit => 8
     @aspect = :all
 
     @contact_hashes = hashes_for_contacts @contacts
-    
+
     if current_user.getting_started == true
       redirect_to getting_started_path
     end
@@ -48,7 +49,7 @@ class AspectsController < ApplicationController
     begin
       current_user.drop_aspect @aspect
       flash[:notice] = I18n.t 'aspects.destroy.success',:name => @aspect.name
-    rescue RuntimeError => e 
+    rescue RuntimeError => e
       flash[:error] = e.message
     end
 
@@ -61,10 +62,11 @@ class AspectsController < ApplicationController
 
   def show
     @aspect = current_user.aspect_by_id params[:id]
+    @contacts = current_user.contacts(:pending => false)
     unless @aspect
       render :file => "#{Rails.root}/public/404.html", :layout => false, :status => 404
     else
-      @aspect_contacts = hashes_for_contacts @aspect.contacts
+      @aspect_contacts = hashes_for_contacts @aspect.contacts(:pending => false)
       @aspect_contacts_count = @aspect_contacts.count
 
       @posts = @aspect.posts.find_all_by__type("StatusMessage", :order => 'created_at desc').paginate :page => params[:page], :per_page => 15
@@ -77,6 +79,7 @@ class AspectsController < ApplicationController
 
   def manage
     @aspect = :manage
+    @contacts = current_user.contacts(:pending => false)
     @remote_requests = Request.hashes_for_person(current_user.person)
     @aspect_hashes = hashes_for_aspects @aspects, @contacts
   end
@@ -106,12 +109,21 @@ class AspectsController < ApplicationController
 
   def add_to_aspect
     begin current_user.add_person_to_aspect( params[:person_id], params[:aspect_id])
+
+      @aspect = current_user.aspects.find(params[:aspect_id])
+      @aspect_id = @aspect.id
       @person_id = params[:person_id]
-      @aspect_id = params[:aspect_id]
+
       flash.now[:notice] =  I18n.t 'aspects.add_to_aspect.success'
 
       respond_to do |format|
-        format.js { render :status => 200 }
+        format.js { render :json => {
+          :button_html => render_to_string(:partial => 'aspects/add_to_aspect',
+                           :locals => {:aspect_id => @aspect_id,
+                                       :person_id => @person_id}),
+          :badge_html =>  render_to_string(:partial => 'aspects/aspect_badge',
+                              :locals => {:aspect => @aspect})
+          }}
         format.html{ redirect_to aspect_path(@aspect_id)}
       end
     rescue Exception => e
@@ -130,19 +142,28 @@ class AspectsController < ApplicationController
       flash.now[:notice] = I18n.t 'aspects.remove_from_aspect.success'
 
       respond_to do |format|
-        format.js { render :status => 200 }
-        format.html{ redirect_to aspect_path(@aspect_id)}
+        format.js { render :json => {:button_html =>
+          render_to_string(:partial => 'aspects/remove_from_aspect',
+                           :locals => {:aspect_id => @aspect_id,
+                                       :person_id => @person_id}),
+          :aspect_id => @aspect_id
+        }}
+        format.html{
+          redirect_to :back
+        }
       end
     rescue Exception => e
       flash.now[:error] = I18n.t 'aspects.remove_from_aspect.failure'
 
       respond_to do |format|
         format.js  { render :text => e, :status => 403 }
-        format.html{ redirect_to aspect_path(@aspect_id)}
+        format.html{
+          redirect_to :back
+        }
       end
     end
   end
-  
+
   private
   def hashes_for_contacts contacts
     people = Person.all(:id.in => contacts.map{|c| c.person_id}, :fields => [:profile])
@@ -152,13 +173,17 @@ class AspectsController < ApplicationController
   end
 
   def hashes_for_aspects aspects, contacts, opts = {}
+    contact_hashes = hashes_for_contacts contacts
     aspects.map do |a|
       hash = {:aspect => a}
-      aspect_contacts = contacts.select{|c| 
-          c.aspect_ids.include?(a.id)}
-      hash[:contact_count] = aspect_contacts.count
-      person_ids = aspect_contacts.map{|c| c.person_id}
-      hash[:people] = Person.all({:id.in => person_ids, :fields => [:profile]}.merge(opts))
+      aspect_contact_hashes = contact_hashes.select{|c|
+          c[:contact].aspect_ids.include?(a.id)}
+      hash[:contact_count] = aspect_contact_hashes.count
+      if opts[:limit]
+        hash[:contacts] = aspect_contact_hashes.slice(0,opts[:limit])
+      else
+        hash[:contacts] = aspect_contact_hashes
+      end
       hash
     end
   end

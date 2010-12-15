@@ -2,17 +2,17 @@ class Notifier < ActionMailer::Base
 
   default :from => APP_CONFIG[:smtp_sender_address]
 
-  ATTACHMENT = File.read("#{Rails.root}/public/images/diaspora_white_on_grey.png")
+  ATTACHMENT = File.read("#{Rails.root}/public/images/white_on_grey.png")
 
   def self.admin(string, recipients, opts = {})
     mails = []
     recipients.each do |rec|
       mail = single_admin(string, rec)
       mails << mail
-      mail.deliver
     end
     mails
   end
+
   def single_admin(string, recipient)
     @recipient = recipient
     @string = string.html_safe
@@ -33,10 +33,9 @@ class Notifier < ActionMailer::Base
          :subject => I18n.t('notifier.new_request.subject', :from => @sender.name), :host => APP_CONFIG[:pod_uri].host)
   end
 
-  def request_accepted(recipient_id, sender_id, aspect_id)
+  def request_accepted(recipient_id, sender_id)
     @receiver = User.find_by_id(recipient_id)
     @sender = Person.find_by_id(sender_id)
-    @aspect = Aspect.find_by_id(aspect_id)
 
     log_mail(recipient_id, sender_id, 'request_accepted')
 

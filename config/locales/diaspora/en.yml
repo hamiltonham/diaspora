@@ -53,6 +53,10 @@ en:
                   attributes:
                       diaspora_handle:
                           taken: "is already taken"
+              contact:
+                  attributes:
+                      person_id:
+                          taken: "must be unique among this user's contacts"
   application:
       helper:
           unknown_person: "unknown person"
@@ -182,7 +186,7 @@ en:
           your_handle: "Your diaspora handle"
           your_email: "Your email"
           edit_account: "Edit account"
-          email_notifications: "Email notificaions"
+          email_notifications: "Email notifications"
           receive_email_notifications: "Receive email notificaions?"
           change: "Change"
       destroy: "Account successfully closed."
@@ -304,7 +308,7 @@ en:
           tell_me_something_good: "tell me something good"
           oh_yeah: "oh yeah!"
       show:
-          destroy: "Destroy"
+          destroy: "Delete"
           permalink: "permalink"
       helper:
           no_message_to_display: "No message to display."
@@ -384,7 +388,7 @@ en:
       create:
           success: "Authentication successful."
       destroy:
-          success: "Successfully destroyed authentication."
+          success: "Successfully deleted authentication."
       failure:
           error: "there was an error connecting that service"
   notifier:
@@ -393,7 +397,7 @@ en:
       thanks: "Thanks,"
       diaspora: "the diaspora email robot"
       single_admin:
-          subject: "A message from your Diaspora administrator:"
+          subject: "A message about your Diaspora account:"
           admin: "Your Diaspora administrator"
       new_request:
           subject: "new Diaspora* contact request from %{from}"
@@ -402,8 +406,7 @@ en:
           sign_in: "sign in here"
       request_accepted:
           subject: "%{name} has accepted your contact request on Diaspora*"
-          accepted: "has accepted your contact request. They are now in your"
-          aspect: "aspect."
+          accepted: "has accepted your contact request!"
   home:
       show:
           share_what_you_want: "Share what you want, with whom you want."
