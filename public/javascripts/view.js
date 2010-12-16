@@ -82,7 +82,8 @@ var View = {
       ".invite_user_button",
       ".add_photo_button",
       ".remove_person_button",
-      ".question_mark"
+      ".question_mark",
+      ".share_with_button"
     ]
   },
 
