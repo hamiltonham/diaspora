@@ -20,7 +20,8 @@ describe User do
   end
 
   it 'should stream only one message to the everyone aspect when a multi-aspected contacts posts' do
-    user.add_person_to_aspect(user2.person.id, user.aspects.create(:name => "villains").id)
+    contact = user.contact_for(user2.person)
+    user.add_contact_to_aspect(contact, user.aspects.create(:name => "villains"))
     status = user2.post(:status_message, :message => "Users do things", :to => aspect2.id)
     xml = status.to_diaspora_xml
     Diaspora::WebSocket.should_receive(:queue_to_user).exactly(:once)
@@ -58,14 +59,24 @@ describe User do
    end
   end
 
-  context 'update posts' do
+  describe '#receive_object' do
+    it 'adds a notification for an object' do
+      Notification.should_receive(:create)
+      user = make_user
+      sm = Factory.create(:status_message)
+      person = Factory.create(:person)
+      user.should_receive(:receive_post).and_return(true)
+      user.receive_object(sm, person)
 
+    end
+  end
+
+  context 'update posts' do
     it 'does not update posts not marked as mutable' do
       status = user.post :status_message, :message => "store this!", :to => aspect.id
       status.message = 'foo'
       xml = status.to_diaspora_xml
       user2.receive(xml, user.person)
-
       status.reload.message.should == 'store this!'
     end
 
@@ -76,7 +87,6 @@ describe User do
       user2.reload.receive(xml, user.person)
       photo.reload.caption.should match(/foo/)
     end
-
   end
 
   describe 'post refs' do

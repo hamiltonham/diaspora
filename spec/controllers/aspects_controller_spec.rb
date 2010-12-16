@@ -17,10 +17,11 @@ describe AspectsController do
 
     connect_users(@user, @aspect, @user2, @aspect2)
 
-    @contact                    = @user.contact_for(@user2.person)
+    @contact = @user.contact_for(@user2.person)
     @user.getting_started = false
     @user.save
     sign_in :user, @user
+    @controller.stub(:current_user).and_return(@user)
     request.env["HTTP_REFERER"] = 'http://' + request.host
   end
 
@@ -146,7 +147,12 @@ describe AspectsController do
   end
 
   describe "#move_contact" do
-    let(:opts) { {:person_id => "person_id", :from => "from_aspect_id", :to => {:to => "to_aspect_id"}} }
+    let(:opts) { {
+      :person_id => "person_id",
+      :from => "from_aspect_id",
+      :to =>
+        {:to => "to_aspect_id"}
+    } }
     it 'calls the move_contact_method' do
       pending "need to figure out what is the deal with remote requests"
       @controller.stub!(:current_user).and_return(@user)
@@ -222,26 +228,41 @@ describe AspectsController do
 
   describe "#add_to_aspect" do
     context 'with a non-contact' do
-      it 'creates a pending contact' do
-        pending
+      before do
+        @person = Factory(:person)
+      end
+      it 'calls send_contact_request_to' do
+        @user.should_receive(:send_contact_request_to).with(@person, @aspect1)
+        post 'add_to_aspect',
+          :format => 'js',
+          :person_id => @person.id,
+          :aspect_id => @aspect1.id
+      end
+      it 'does not call add_contact_to_aspect' do
+        @user.should_not_receive(:add_contact_to_aspect)
+        post 'add_to_aspect',
+          :format => 'js',
+          :person_id => @person.id,
+          :aspect_id => @aspect1.id
       end
     end
     it 'adds the users to the aspect' do
-      @aspect1.reload
-      @aspect1.contacts.include?(@contact).should be_false
-      post 'add_to_aspect', :format => 'js', :person_id => @user2.person.id, :aspect_id => @aspect1.id
+      @user.should_receive(:add_contact_to_aspect)
+      post 'add_to_aspect',
+        :format => 'js',
+        :person_id => @user2.person.id,
+        :aspect_id => @aspect1.id
       response.should be_success
-      @aspect1.reload
-      @aspect1.contacts.include?(@contact).should be_true
     end
   end
 
   describe "#remove_from_aspect" do
     it 'removes contacts from an aspect' do
-      @user.add_person_to_aspect( @user2.person.id, @aspect1.id)
-      @aspect.reload
-      @aspect.contacts.include?(@contact).should be true
-      post 'remove_from_aspect', :format => 'js', :person_id => @user2.person.id, :aspect_id => @aspect.id
+      @user.add_contact_to_aspect(@contact, @aspect1)
+      post 'remove_from_aspect',
+        :format => 'js',
+        :person_id => @user2.person.id,
+        :aspect_id => @aspect.id
       response.should be_success
       @aspect.reload
       @aspect.contacts.include?(@contact).should be false

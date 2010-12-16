@@ -93,11 +93,10 @@ describe Diaspora::UserModules::Connecting do
       let(:request2_for_user) {Request.instantiate(:to => user.person, :from => person_one)}
       let(:request_from_myself) {Request.instantiate(:to => user.person, :from => user.person)}
       before do
-        request_for_user.save
         user.receive(request_for_user.to_diaspora_xml, person)
-        @received_request = Request.from(person).to(user.person).first(:sent => false)
+        @received_request = Request.from(person).to(user.person).first
         user.receive(request2_for_user.to_diaspora_xml, person_one)
-        @received_request2 = Request.from(person_one).to(user.person).first(:sent => false)
+        @received_request2 = Request.from(person_one).to(user.person).first
         user.reload
       end
 
@@ -230,7 +229,7 @@ describe Diaspora::UserModules::Connecting do
       end
 
       it 'should disconnect the other user on the same seed' do
-        lambda { 
+        lambda {
           user2.disconnect user.person }.should change {
           user2.reload.contacts.count }.by(-1)
         aspect2.reload.contacts.count.should == 0
@@ -243,7 +242,9 @@ describe Diaspora::UserModules::Connecting do
       end
 
       it 'should remove the contact from all aspects they are in' do
-        user.add_person_to_aspect(user2.person.id, aspect1.id)
+        user.add_contact_to_aspect(
+          user.contact_for(user2.person),
+          aspect1)
         aspect.reload.contacts.count.should == 1
         aspect1.reload.contacts.count.should == 1
         lambda { user.disconnected_by user2.person }.should change {

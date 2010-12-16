@@ -44,23 +44,27 @@ en:
               user:
                   attributes:
                       person:
-                          invalid: "is invalid"
+                          invalid: "is invalid."
                       username:
-                          taken: "is already taken"
+                          taken: "is already taken."
                       email:
-                          taken: "is already taken"
+                          taken: "is already taken."
               person:
                   attributes:
                       diaspora_handle:
-                          taken: "is already taken"
+                          taken: "is already taken."
               contact:
                   attributes:
                       person_id:
-                          taken: "must be unique among this user's contacts"
+                          taken: "must be unique among this user's contacts."
+              request:
+                  attributes:
+                      from_id:
+                          taken: "is a duplicate of a pre-existing request."
   application:
       helper:
           unknown_person: "unknown person"
-          youtube_title:
+          video_title:
               unknown: "Unknown Video Title"
           aspect_badge:
               all_aspects: "All aspects"
@@ -330,10 +334,8 @@ en:
           incoming_request: "You have an incoming request from this person."
           return_to_aspects: "Return to your aspects page"
           to_accept_or_ignore: "to accept or ignore it."
-          request_people: "If you'd like, you can request to place him/her in one of your aspects."
-          already_requested: "You have already sent a request to %{name}."
           does_not_exist: "Person does not exist!"
-          not_connected: "You are not connected with this person"
+          not_connected: "You are not sharing with %{name}"
           recent_posts: "Recent Posts"
           recent_public_posts: "Recent Public Posts"
       edit:

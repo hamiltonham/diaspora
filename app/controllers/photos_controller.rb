@@ -13,9 +13,13 @@ class PhotosController < ApplicationController
     @person = Person.find_by_id(params[:person_id])
 
     if @person
+      @incoming_request = Request.to(current_user).from(@person).first
+      @outgoing_request = Request.from(current_user).to(@person).first
+
       @profile = @person.profile
       @contact = current_user.contact_for(@person)
       @is_contact = @person != current_user.person && @contact
+      @aspects_with_person = []
 
       if @contact
         @aspects_with_person = @contact.aspects

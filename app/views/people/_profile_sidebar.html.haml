@@ -25,7 +25,7 @@
     %hr{:style=>"width:300px;"}
 
   %ul
-    - if contact
+    - unless person == current_user.person
       %li
         = render :partial => 'people/aspect_list',
           :locals => {:person => person,
@@ -35,7 +35,7 @@
       %br
       %hr{:style=>"width:300px;"}
 
-  -if contact || person == current_user.person
+  -if (contact && !contact.pending?) || person == current_user.person
     %ul#profile_information
       %li
         %h3 #{t('.bio')}
