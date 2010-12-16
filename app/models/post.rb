@@ -24,6 +24,7 @@ class Post
   key :aspect_ids, Array, :typecast => 'ObjectId'
 
   many :comments, :class_name => 'Comment', :foreign_key => :post_id, :order => 'created_at ASC'
+  many :likes, :class_name => 'Like', :foreign_key => :post_id, :order => 'created_at ASC'
   many :aspects, :in => :aspect_ids, :class_name => 'Aspect'
   belongs_to :person, :class_name => 'Person'
 
