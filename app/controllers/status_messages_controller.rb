@@ -75,10 +75,16 @@ class StatusMessagesController < ApplicationController
   def show
     @status_message = current_user.find_visible_post_by_id params[:id]
     comments_hash = Comment.hash_from_post_ids [@status_message.id]
+    likes_hash = Like.hash_from_post_ids [@status_message.id]
     person_hash = Person.from_post_comment_hash comments_hash
     @comment_hashes = comments_hash[@status_message.id].map do |comment|
       {:comment => comment,
         :person => person_hash[comment.person_id]
+      }
+    end
+    @like_hashes = likes_hash[@status_message.id].map do |like|
+      {:like => like,
+        :person => person_hash[like.person_id]
       }
     end
     respond_with @status_message
