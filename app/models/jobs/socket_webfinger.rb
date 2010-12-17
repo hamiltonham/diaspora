@@ -1,5 +1,6 @@
 module Jobs
   class SocketWebfinger
+    extend ResqueJobLogging
     @queue = :socket_webfinger
     def self.perform(user_id, account, opts={})
       finger = Webfinger.new(account)

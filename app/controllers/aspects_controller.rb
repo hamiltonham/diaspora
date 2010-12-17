@@ -65,6 +65,8 @@ class AspectsController < ApplicationController
       @aspect_contacts = hashes_for_contacts Contact.all(:user_id => current_user.id, :aspect_ids.in => [@aspect.id], :pending => false)
       @aspect_contacts_count = @aspect_contacts.count
 
+      @all_contacts = hashes_for_contacts @contacts
+
       @posts = @aspect.posts.find_all_by__type("StatusMessage", :order => 'created_at desc').paginate :page => params[:page], :per_page => 15
       @post_hashes = hashes_for_posts @posts
       @post_count = @posts.count
@@ -168,7 +170,7 @@ class AspectsController < ApplicationController
 
   private
   def hashes_for_contacts contacts
-    people = Person.all(:id.in => contacts.map{|c| c.person_id}, :fields => [:profile])
+    people = Person.all(:id.in => contacts.map{|c| c.person_id}, :fields => [:profile, :diaspora_handle])
     people_hash = {}
     people.each{|p| people_hash[p.id] = p}
     contacts.map{|c| {:contact => c, :person => people_hash[c.person_id.to_id]}}
@@ -190,18 +192,26 @@ class AspectsController < ApplicationController
     end
   end
   def hashes_for_posts posts
-    post_ids = posts.map{|p| p.id}
+    post_ids = []
+    post_person_ids = []
+    posts.each{|p| post_ids << p.id; post_person_ids << p.person_id}
+
     comment_hash = Comment.hash_from_post_ids post_ids
-    person_hash = Person.from_post_comment_hash comment_hash
+    commenters_hash = Person.from_post_comment_hash comment_hash
     photo_hash = Photo.hash_from_post_ids post_ids
+
+    post_person_ids.uniq!
+    posters = Person.all(:id.in => post_person_ids, :fields => [:profile, :owner_id, :diaspora_handle])
+    posters_hash = {}
+    posters.each{|poster| posters_hash[poster.id] = poster}
 
     posts.map do |post|
       {:post => post,
         :photos => photo_hash[post.id],
-        :person => post.person,
+        :person => posters_hash[post.person_id],
         :comments => comment_hash[post.id].map do |comment|
           {:comment => comment,
-            :person => person_hash[comment.person_id],
+            :person => commenters_hash[comment.person_id],
           }
         end,
       }

@@ -4,6 +4,7 @@
 
 module Diaspora
   module Webhooks
+    require 'builder/xchar'
 
     def to_diaspora_xml
       xml = "<XML>"
@@ -11,5 +12,8 @@ module Diaspora
       xml += "</XML>"
     end
 
+    def x(input)
+      input.to_s.to_xs
+    end
   end
 end

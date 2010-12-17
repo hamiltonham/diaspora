@@ -47,7 +47,6 @@ class PeopleController < ApplicationController
 
     if @person
       @incoming_request = Request.to(current_user).from(@person).first
-      @outgoing_request = Request.from(current_user).to(@person).first
 
       @profile = @person.profile
       @contact = current_user.contact_for(@person)
@@ -55,6 +54,7 @@ class PeopleController < ApplicationController
 
       if @contact
         @aspects_with_person = @contact.aspects
+        @similar_people = similar_people @contact
       end
 
       if (@person != current_user.person) && (!@contact || @contact.pending)
@@ -152,4 +152,5 @@ class PeopleController < ApplicationController
   def webfinger(account, opts = {})
     Resque.enqueue(Jobs::SocketWebfinger, current_user.id, account, opts)
   end
+
 end

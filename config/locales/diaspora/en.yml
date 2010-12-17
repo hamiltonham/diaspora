@@ -83,6 +83,7 @@ en:
         code: "code"
       application:
         powered_by: "POWERED BY DIASPORA*"
+        whats_new: "what's new?"
   shared:
       publisher:
           posting: "Posting..."
@@ -178,6 +179,11 @@ en:
           remove_aspect: "Delete this aspect"
           confirm_remove_aspect: "Are you sure you want to delete this aspect?"
           add_existing: "Add an existing contact"
+  notifications:
+      request_accepted: "accepted your share request."
+      new_request: "offered to share with you."
+      comment_on_post: "commented on your"
+      post: 'post'
   users:
       edit:
           export_data: "Export Data"
@@ -338,6 +344,7 @@ en:
           not_connected: "You are not sharing with %{name}"
           recent_posts: "Recent Posts"
           recent_public_posts: "Recent Public Posts"
+          similar_contacts: "similar contacts"
       edit:
           info_available_to: "This info will be available to whomever you connect with on Diaspora."
           your_profile: "Your profile"

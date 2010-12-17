@@ -14,7 +14,8 @@ class User
   plugin MongoMapper::Devise
 
   devise :invitable, :database_authenticatable, :registerable,
-         :recoverable, :rememberable, :trackable, :validatable
+         :recoverable, :rememberable, :trackable, :validatable,
+         :timeoutable
 
   key :username
   key :serialized_private_key, String
@@ -51,7 +52,7 @@ class User
   many :aspects, :class => Aspect, :dependent => :destroy
 
   many :services, :class => Service
-
+  timestamps!
   #after_create :seed_aspects
 
   before_destroy :disconnect_everyone, :remove_person
@@ -189,7 +190,6 @@ class User
 
   def push_to_aspects(post, aspects)
     #send to the aspects
-    #
     target_aspect_ids = aspects.map {|a| a.id}
 
     target_contacts = Contact.all(:aspect_ids.in => target_aspect_ids, :pending => false)
@@ -211,7 +211,12 @@ class User
     # calling nil? performs a necessary evaluation.
     if person.owner_id
       Rails.logger.info("event=push_to_person route=local sender=#{self.diaspora_handle} recipient=#{person.diaspora_handle} payload_type=#{post.class}")
-      Resque.enqueue(Jobs::Receive, person.owner_id, post.to_diaspora_xml, self.person.id)
+
+      if post.is_a?(Post) || post.is_a?(Comment)
+        Resque.enqueue(Jobs::ReceiveLocal, person.owner_id, self.person.id, post.class.to_s, post.id)
+      else
+        Resque.enqueue(Jobs::Receive, person.owner_id, post.to_diaspora_xml, self.person.id)
+      end
     else
       xml = salmon.xml_for person
       Rails.logger.info("event=push_to_person route=remote sender=#{self.diaspora_handle} recipient=#{person.diaspora_handle} payload_type=#{post.class}")
