@@ -145,6 +145,11 @@ class PeopleController < ApplicationController
             :person => person_hash[comment.person_id],
           }
         end,
+        :likes => like_hash[post.id].map do |like|
+          {:like => like,
+            :person => person_hash[comment.person_id],
+          }
+        end
       }
     end
   end

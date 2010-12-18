@@ -46,6 +46,7 @@ class StatusMessagesController < ApplicationController
                                          :person => @status_message.person,
                                          :photos => @status_message.photos,
                                          :comments => [],
+                                         :likes => [],
                                          :aspects => current_user.aspects,
                                          :current_user => current_user
                                         }
@@ -77,6 +78,7 @@ class StatusMessagesController < ApplicationController
     comments_hash = Comment.hash_from_post_ids [@status_message.id]
     likes_hash = Like.hash_from_post_ids [@status_message.id]
     person_hash = Person.from_post_comment_hash comments_hash
+    person_lhash = Person.from_post_comment_hash likes_hash
     @comment_hashes = comments_hash[@status_message.id].map do |comment|
       {:comment => comment,
         :person => person_hash[comment.person_id]
@@ -84,7 +86,7 @@ class StatusMessagesController < ApplicationController
     end
     @like_hashes = likes_hash[@status_message.id].map do |like|
       {:like => like,
-        :person => person_hash[like.person_id]
+        :person => person_lhash[like.person_id]
       }
     end
     respond_with @status_message

@@ -167,6 +167,14 @@ class Person
     people_hash
   end
 
+  def self.from_post_like_hash(hash)
+    person_ids = hash.values.flatten.map!{|l| l.person_id}.uniq
+    people = where(:id.in => person_ids).fields(:profile, :diaspora_handle)
+    people_hash = {}
+    people.each{|p| people_hash[p.id] = p}
+    people_hash
+  end
+
   protected
 
   def clean_url

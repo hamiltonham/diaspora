@@ -212,7 +212,7 @@ class User
     if person.owner_id
       Rails.logger.info("event=push_to_person route=local sender=#{self.diaspora_handle} recipient=#{person.diaspora_handle} payload_type=#{post.class}")
 
-      if post.is_a?(Post) || post.is_a?(Comment)
+      if post.is_a?(Post) || post.is_a?(Comment) || post.is_a?(Like)
         Resque.enqueue(Jobs::ReceiveLocal, person.owner_id, self.person.id, post.class.to_s, post.id)
       else
         Resque.enqueue(Jobs::Receive, person.owner_id, post.to_diaspora_xml, self.person.id)
