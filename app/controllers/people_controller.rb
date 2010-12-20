@@ -133,7 +133,9 @@ class PeopleController < ApplicationController
   def hashes_for_posts posts
     post_ids = posts.map{|p| p.id}
     comment_hash = Comment.hash_from_post_ids post_ids
+    like_hash = Like.hash_from_post_ids post_ids
     person_hash = Person.from_post_comment_hash comment_hash
+    person_lhash = Person.from_post_comment_hash like_hash
     photo_hash = Photo.hash_from_post_ids post_ids
 
     posts.map do |post|
@@ -147,7 +149,7 @@ class PeopleController < ApplicationController
         end,
         :likes => like_hash[post.id].map do |like|
           {:like => like,
-            :person => person_hash[comment.person_id],
+            :person => person_lhash[like.person_id],
           }
         end
       }
