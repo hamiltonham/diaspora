@@ -6,7 +6,7 @@
 nl: 
   _comments: "Reacties"
   _home: "Home"
-  _photos: "fotos"
+  _photos: "foto's"
   _services: "Services"
   account: "Account"
   activemodel: 
@@ -15,23 +15,23 @@ nl:
         contact:
           attributes:
             person_id:
-              taken: "must be unique among this user's contacts."
-        person: 
-          attributes: 
-            diaspora_handle: 
-              taken: "is al bezet"
+              taken: "moet uniek zijn binnen de contacten van deze gebruiker."
+        person:
+          attributes:
+            diaspora_handle:
+              taken: "is al in gebruik."
         request:
           attributes:
             from_id:
-              taken: "is a duplicate of a pre-existing request."
+              taken: "is een duplicaat van een reeds bestaand verzoek."
         user: 
           attributes: 
             email: 
-              taken: "is al bezet"
+              taken: "is al in gebruik."
             person: 
-              invalid: "is ongeldig"
+              invalid: "is ongeldig."
             username: 
-              taken: "is al bezet"
+              taken: "is al in gebruik."
   ago: "%{time} geleden"
   application: 
     helper: 
@@ -39,24 +39,24 @@ nl:
         all_aspects: "Alle aspecten"
       unknown_person: "onbekend persoon"
       video_title:
-        unknown: "Unknown Video Title"
+        unknown: "Onbekende Videotitel"
   are_you_sure: "Weet je het zeker?"
-  aspects: 
-    add_to_aspect: 
-      failure: "Vriend toevoegen aan aspect mislukt."
-      success: "Contact succesvol toegevoegd aan aspect."
+  aspects:
+    add_to_aspect:
+      failure: "Contact toevoegen aan aspect is mislukt."
+      success: "Contact is met succes toegevoegd aan aspect."
     all_aspects_contacts:
       add_aspect: "voeg aspect toe"
       all_contacts: "Alle contacten"
       aspects: "Aspecten"
       no_contacts: "Je hebt momenteel geen contacten. Vind je contacten hier!"
     aspect_contacts:
-      done_editing: "bewerken klaar"
+      done_editing: "klaar met bewerken"
     create: 
-      failure: "Aanmaken van aspect mislukt."
+      failure: "Aanmaken van aspect is mislukt."
       success: "Je nieuwe aspect %{name} is aangemaakt"
     destroy: 
-      success: "%{name} is succesvol verwijderd."
+      success: "%{name} is met succes verwijderd."
     edit_aspect_pane: 
       add_existing: "Voeg een bestaand contact toe"
       confirm_remove_aspect: "Weet je zeker dat je dit aspect wilt verwijderen?"
@@ -72,8 +72,8 @@ nl:
       add_a_new_contact: "Voeg contact toe"
       drag_to_add: "Sleep om toe te voegen"
       manage_aspects: "Beheer aspecten"
-      no_requests: "Geen nieuwe aanvragen"
-      requests: "Aanvragen"
+      no_requests: "Geen nieuwe verzoeken"
+      requests: "Contactverzoeken"
     move_contact: 
       error: "Probleem bij het verplaatsen van contact: %{inspect}"
       failure: "werkte niet %{inspect}"
@@ -106,6 +106,9 @@ nl:
     new_comment: 
       comment: "Reactie"
       commenting: "Reageren..."
+      enter: "enter"
+      press: "press"
+      to_comment: "to comment"
   contacts: 
     few: "%{count} contacten"
     one: "1 contact"
@@ -156,6 +159,7 @@ nl:
   layouts: 
     application: 
       powered_by: "POWERED BY DIASPORA*"
+      whats_new: "wat is nieuw op Diaspora?"
     header: 
       account_settings: "account instellingen"
       blog: "blog"
@@ -169,6 +173,11 @@ nl:
     one: "nieuw verzoek!"
     other: "%{count} nieuwe verzoeken!"
     zero: "geen nieuwe verzoeken"
+  notifications:
+    comment_on_post: "reageerde op jou"
+    new_request: "bood aan om met jou te delen."
+    post: "post"
+    request_accepted: "heeft je verzoek geaccepteerd."
   notifier: 
     diaspora: "de diaspora email robot"
     hello: "Hoi %{name}!"
@@ -179,11 +188,11 @@ nl:
       subject: "nieuw Diaspora* contactverzoek van %{from}"
       try_it_out: "Overweeg eens een kijkje te nemen."
     request_accepted: 
-      accepted: "heeft je vriendenverzoek geaccepteerd. Hij/zij staat nu in je"
-      subject: "%{name} heeft je vriendenverzoek geaccepteerd op Diaspora*"
+      accepted: "heeft je contactverzoek geaccepteerd!"
+      subject: "%{name} heeft je contactverzoek geaccepteerd op Diaspora*"
     single_admin:
       admin: "Je Diaspora administrator"
-      subject: "Een bericht van je Diaspora administrator:"
+      subject: "Een bericht over je Diaspora account:"
     thanks: "Bedankt,"
   ok: "OK"
   or: "of"
@@ -193,6 +202,8 @@ nl:
   password: "Wachtwoord"
   password_confirmation: "Wachtwoordbevestiging"
   people: 
+    aspect_list:
+      edit_membership: "bewerk aspect lidmaatschap"
     edit: 
       allow_search: "Sta toe door anderen gevonden te kunnen worden binnen Diaspora"
       edit_profile: "Bewerk profiel"
@@ -216,28 +227,30 @@ nl:
       results_for: "zoekresultaten voor"
     person: 
       add_contact: "voeg contact toe"
-      already_connected: "Al bevriend"
+      already_connected: "Al verbonden"
       pending_request: "openstaand verzoek"
       thats_you: "Dat ben jij!"
     profile_sidebar: 
       bio: "bio"
-      born: "geboren"
+      born: "geboortedatum"
       cannot_remove: "Kan %{name} niet van laatste aspect verwijderen. (Als je met deze persoon wilt breken moet je dit contact verwijderen)"
       edit_my_profile: "Bewerk mijn profiel"
       gender: "geslacht"
       in_aspects: "in de aspecten"
       remove_contact: "verwijder contact"
       remove_from: "Verwijder %{name} uit %{aspect}?"
+    share_with:
+      accepts: "Zodra %{name} accepteert, zul je elkaars posts kunnen gaan zien op Diaspora"
+      share_with: "Start delen met %{name}"
     show: 
-      already_requested: "Je hebt al een verzoek gestuurd naar %{name}."
       does_not_exist: "Die persoon bestaat niet!"
       incoming_request: "Je hebt een binnenkomend verzoek van deze persoon."
       no_posts: "geen berichten om weer te geven!"
-      not_connected: "Je bent niet verbonden met deze persoon"
+      not_connected: "Je deelt niet met %{name}"
       recent_posts: "Recente Berichten"
       recent_public_posts: "Recente Openbare Berichten"
-      request_people: "Als je wilt kun je hem of haar verzoeken om hem/haar in een van je aspecten plaatsen."
       return_to_aspects: "Ga terug naar je aspecten pagina"
+      similar_contacts: "vergelijkbare contacten"
       to_accept_or_ignore: "om te accepteren of te negeren."
     update: 
       failed: "Updaten van profiel mislukt"
@@ -303,8 +316,8 @@ nl:
       sent: "Je hebt gevraagd te delen met %{name}. Hij of zij zou het moeten zien eerstvolgende keer dat hij of zij inlogt op Diaspora."
     destroy: 
       error: "Selecteer een aspect!"
-      ignore: "Vriendenverzoek genegeerd."
-      success: "Jullie zijn nu vrienden."
+      ignore: "Contactverzoek genegeerd."
+      success: "Jullie zijn nu contacten."
     manage_aspect_contacts: 
       existing: "Bestaande contacten"
       manage_within: "Beheer contacten in"
@@ -422,7 +435,7 @@ nl:
     public: 
       does_not_exist: "Gebruiker %{username} bestaat niet!"
     update: 
-      email_notifications_changed: "Taal veranderen mislukt"
+      email_notifications_changed: "E-mail notificaties veranderd"
       language_changed: "Taal gewijzigd"
       language_not_changed: "Taal wijzigen mislukt"
       password_changed: "Wachtwoord gewijzigd"
