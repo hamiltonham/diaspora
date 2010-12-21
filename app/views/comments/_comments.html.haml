@@ -9,12 +9,16 @@
       %b= comment_toggle(comment_hashes.size)
 
 %ul.comments{:id => post_id, :class => ("hidden" if comment_hashes.size == 0)}
-  -
+  -if like_hashes.size > 2
+    .older_comments{:class => ("hidden inactive" if defined?(condensed) && condensed)}
+      =render :partial => 'likes/like', :collection => like_hashes[0..-3], :as => :hash
+    = render :partial => 'likes/like', :collection => like_hashes[-2, 2], :as => :hash
   -if comment_hashes.size > 3
     .older_comments{:class => ("hidden inactive" if defined?(condensed) && condensed)}
       = render :partial => 'comments/comment', :collection => comment_hashes[0..-4], :as => :hash
     = render :partial => 'comments/comment', :collection => comment_hashes[-3, 3], :as => :hash
   -else
+    = render :partial => 'likes/like', :collection => like_hashes, :as => :hash
     = render :partial => 'comments/comment', :collection => comment_hashes, :as => :hash
 
   - unless @commenting_disabled

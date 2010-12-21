@@ -148,6 +148,7 @@ class PhotosController < ApplicationController
       comments_hash = Comment.hash_from_post_ids [@parent.id]
       person_hash = Person.from_post_comment_hash comments_hash
       likes_hash = Like.hash_from_post_ids [@parent.id]
+      person_lhash = Person.from_post_like_hash likes_hash
       @comment_hashes = comments_hash[@parent.id].map do |comment|
         {:comment => comment,
           :person => person_hash[comment.person_id]

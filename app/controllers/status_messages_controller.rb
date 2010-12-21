@@ -78,7 +78,7 @@ class StatusMessagesController < ApplicationController
     comments_hash = Comment.hash_from_post_ids [@status_message.id]
     likes_hash = Like.hash_from_post_ids [@status_message.id]
     person_hash = Person.from_post_comment_hash comments_hash
-    person_lhash = Person.from_post_comment_hash likes_hash
+    person_lhash = Person.from_post_like_hash likes_hash
     @comment_hashes = comments_hash[@status_message.id].map do |comment|
       {:comment => comment,
         :person => person_hash[comment.person_id]
