@@ -42,6 +42,14 @@ describe ApplicationHelper do
     end
   end
 
+  describe "#person_image_tag" do
+    it "should not allow basic XSS/HTML" do
+      @person.profile.first_name = "I'm <h1>Evil"
+      @person.profile.last_name = "I'm <h1>Evil"
+      person_image_tag(@person).should_not include("<h1>")
+    end
+  end
+
   describe "markdownify" do
     describe "autolinks" do
       it "should not allow basic XSS/HTML" do
