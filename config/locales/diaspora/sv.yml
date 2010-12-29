@@ -12,34 +12,19 @@ sv:
   activemodel: 
     errors: 
       models: 
-<<<<<<< HEAD
-        contact:
-          attributes:
-            person_id:
-              taken: "must be unique among this user's contacts."
-=======
         contact: 
           attributes: 
             person_id: 
               taken: "måste vara unik bland denna användares kontakter."
->>>>>>> 154fa77bd6dbcd6ed264a8322de8ffee6fc88052
         person: 
           attributes: 
             diaspora_handle: 
               taken: "är redan taget"
-<<<<<<< HEAD
-        request:
-          attributes:
-            from_id:
-              taken: "is a duplicate of a pre-existing request."
-        user:
-=======
         request: 
           attributes: 
             from_id: 
               taken: "är en dublett av en existerande förfrågan."
         user: 
->>>>>>> 154fa77bd6dbcd6ed264a8322de8ffee6fc88052
           attributes: 
             email: 
               taken: "är redan taget."
@@ -53,13 +38,8 @@ sv:
       aspect_badge:
         all_aspects: "Alla sidor"
       unknown_person: "okänd person"
-<<<<<<< HEAD
-      video_title:
-        unknown: "Unknown Video Title"
-=======
       video_title: 
         unknown: "Okänd videotitel"
->>>>>>> 154fa77bd6dbcd6ed264a8322de8ffee6fc88052
   are_you_sure: "Är du säker?"
   aspects: 
     add_to_aspect: 
@@ -194,18 +174,6 @@ sv:
     one: "ny förfrågan!"
     other: "%{count} nya förfrågningar!"
     zero: "inga nya förfrågningar"
-<<<<<<< HEAD
-  next: "next"
-  no_new_notifications: "no new notifications"
-  notifications:
-    comment_on_post: "commented on your"
-    deleted: "deleted"
-    index:
-      notifications: "Notifications"
-    new_request: "offered to share with you."
-    post: "post"
-    request_accepted: "accepted your share request."
-=======
   next: "nästa"
   no_new_notifications: "inga nya notifieringar"
   notifications: 
@@ -216,7 +184,6 @@ sv:
     new_request: "erbjöd sig att dela med dig."
     post: "meddelande"
     request_accepted: "accepterade din förfrågan om att dela."
->>>>>>> 154fa77bd6dbcd6ed264a8322de8ffee6fc88052
   notifier: 
     diaspora: "Diasporas mailrobot"
     hello: "Hej %{name}!"
@@ -241,13 +208,8 @@ sv:
   password: "Lösenord"
   password_confirmation: "Bekräfta lösenord"
   people: 
-<<<<<<< HEAD
-    aspect_list:
-      edit_membership: "edit aspect membership"
-=======
     aspect_list: 
       edit_membership: "flytta mellan sidor"
->>>>>>> 154fa77bd6dbcd6ed264a8322de8ffee6fc88052
     edit: 
       allow_search: "Tillåt andra användare på Diaspora att söka efter dig"
       edit_profile: "Ändra profil"
@@ -283,15 +245,9 @@ sv:
       in_aspects: "på sidor"
       remove_contact: "ta bort kontakt"
       remove_from: "Ta bort %{name} från %{aspect}?"
-<<<<<<< HEAD
-    share_with:
-      accepts: "Once %{name} accepts, you'll start seeing each other's posts on Diaspora"
-      share_with: "Start sharing with %{name}"
-=======
     share_with: 
       accepts: "Så snart %{name} accepterar kommer ni kunna se varandras meddelanden och bilder"
       share_with: "Börja dela med %{name}"
->>>>>>> 154fa77bd6dbcd6ed264a8322de8ffee6fc88052
     show: 
       does_not_exist: "Den här personen finns inte!"
       incoming_request: "Du har en inkommande förfrågan från den här personen."

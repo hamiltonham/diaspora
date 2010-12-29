@@ -174,18 +174,6 @@ hu:
     one: "új felkérés!"
     other: "%{count} új felkérések!"
     zero: "nincsenek új felkérések"
-<<<<<<< HEAD
-  next: "next"
-  no_new_notifications: "no new notifications"
-  notifications:
-    comment_on_post: "commented on your"
-    deleted: "deleted"
-    index:
-      notifications: "Notifications"
-    new_request: "offered to share with you."
-    post: "post"
-    request_accepted: "accepted your share request."
-=======
   next: "következő"
   no_new_notifications: "nincs új értesítés"
   notifications: 
@@ -196,7 +184,6 @@ hu:
     new_request: "megosztást ajánlott neked."
     post: "bejegyzés"
     request_accepted: "elfogadta a megosztási kérésed."
->>>>>>> 154fa77bd6dbcd6ed264a8322de8ffee6fc88052
   notifier: 
     diaspora: "A diaspora email robot"
     hello: "Szia %{name}!"
@@ -221,13 +208,8 @@ hu:
   password: "Jelszó"
   password_confirmation: "Jelszó megerősítése"
   people: 
-<<<<<<< HEAD
-    aspect_list:
-      edit_membership: "edit aspect membership"
-=======
     aspect_list: 
       edit_membership: "csoport tagság szerkesztése"
->>>>>>> 154fa77bd6dbcd6ed264a8322de8ffee6fc88052
     edit: 
       allow_search: "Megengedem, hogy megtalálható legyek a Diaspora keresési találatokban."
       edit_profile: "Profil szerkesztése"
@@ -263,15 +245,9 @@ hu:
       in_aspects: "csoportokban"
       remove_contact: "kapcsolat törlése"
       remove_from: "Törlöd %{name}-t a %{aspect} csoportból?"
-<<<<<<< HEAD
-    share_with:
-      accepts: "Once %{name} accepts, you'll start seeing each other's posts on Diaspora"
-      share_with: "Start sharing with %{name}"
-=======
     share_with: 
       accepts: "Ha %{name} elfogadja a felkérést, akkor látjátok majd egymás bejegyzéseit."
       share_with: "Megosztás vele: %{name}"
->>>>>>> 154fa77bd6dbcd6ed264a8322de8ffee6fc88052
     show: 
       does_not_exist: "Személy nem létezik!"
       incoming_request: "Felkérésed érkezett ettől a személytől"
