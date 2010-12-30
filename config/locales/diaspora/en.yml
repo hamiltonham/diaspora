@@ -459,5 +459,3 @@ en:
   pagination:
       next: "Next"
       previous: "Previous"
-  like: "likes this"
-  dislike: "dislikes this"
