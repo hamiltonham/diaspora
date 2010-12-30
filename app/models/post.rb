@@ -64,6 +64,7 @@ class Post
   protected
   def destroy_comments
     comments.each{|c| c.destroy}
+    likes.each{|l| l.destroy}
   end
 
   def propogate_retraction

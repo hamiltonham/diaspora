@@ -70,3 +70,4 @@ end
 
 Factory.define(:comment) {}
 
+Factory.define(:like) {}

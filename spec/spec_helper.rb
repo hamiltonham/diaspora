@@ -106,6 +106,17 @@ class User
       c
     end
   end
+
+  def like(text, options = {})
+    fantasy_resque do
+      l = build_like(text, options)
+      if l.save!
+        raise 'MongoMapper failed to catch a failed save' unless l.id
+        dispatch_like(l)
+      end
+      l
+    end
+  end
 end
 
 

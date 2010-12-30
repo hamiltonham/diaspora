@@ -116,7 +116,7 @@ then
     exit 64
 fi
 
-redis_config
+#redis_config
 
 # Force AGPL
 if [ -w public -a ! -e  public/source.tar.gz ]; then

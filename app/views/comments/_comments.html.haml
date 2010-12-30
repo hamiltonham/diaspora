@@ -9,7 +9,7 @@
       %b= comment_toggle(comment_hashes.size)
 
 %ul.comments{:id => post_id, :class => ("hidden" if comment_hashes.size == 0)}
-  = render 'likes/like'
+  = render :partial => 'likes/like', :collection => like_hashes, :as => :hash
 -#  = render 'likes/dislike'
   -if comment_hashes.size > 3
     .older_comments{:class => ("hidden inactive" if defined?(condensed) && condensed)}

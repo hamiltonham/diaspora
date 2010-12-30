@@ -154,7 +154,7 @@ class PhotosController < ApplicationController
           :person => person_hash[comment.person_id]
         }
       end
-      @like_hashes = likes_has[@parent.id].map do |like|
+      @like_hashes = likes_hash[@parent.id].map do |like|
         {:like => like,
           :person => person_hash[like.person_id]
         }
